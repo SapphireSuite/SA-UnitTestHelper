@@ -288,14 +288,14 @@ namespace Sa
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Title);\
 					UTH_LOG(titleStr)\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::None);\
-	\
+				\
 					if(Sa::UTH::verbosity & Sa::UTH::ParamsFailure)\
 						std::cout << paramStr;\
-	\
+				\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Failure);\
 					UTH_LOG("Failure\n\n")\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::None);\
-	\
+				\
 					if constexpr(UTH_EXIT_ON_FAILURE)\
 						exit(EXIT_FAILURE);\
 					else\
@@ -306,10 +306,10 @@ namespace Sa
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Title);\
 					UTH_LOG(titleStr)\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::None);\
-	\
+				\
 					if(Sa::UTH::verbosity & UTH::ParamsSuccess)\
 						std::cout << paramStr;\
-	\
+				\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Success);\
 					UTH_LOG("Success\n\n")\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::None);\
@@ -320,6 +320,30 @@ namespace Sa
 		}
 
 		/// \endcond
+
+
+		/**
+		*	\brief Run a \e <b> Unit Test </b> using internal Equals implementation.
+		*
+		*	UTH::exit will be equal to 1 if at least one test failed.
+		*
+		*	\param[in] _lhs		Left hand side operand to test.
+		*	\param[in] _rhs		Right hand side operand to test.
+		*
+		*	Additionnal params: 
+		*	uint32 size:		Size lenght to compare _lhs and _rhs are T*
+		*	T epsilon			Epsilon value to allow threshold.
+		*/
+		#define UTH_EQUALS_TEST(_lhs, _rhs, ...)\
+		{\
+			std::string titleStr = __UTH_TITLE "Sa::UTH::Equals(" #_lhs ", " #_rhs;\
+			titleStr += Sa::UTH::Internal::__SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ : "";\
+			titleStr += + ")" __UTH_LINE_STR;\
+			std::string paramStr = Sa::UTH::Internal::__ArgsToString(#_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, __VA_ARGS__);\
+		\
+			bool bRes = Sa::UTH::Internal::Equals(_lhs, _rhs, __VA_ARGS__);\
+			__UTH_TEST_RESULT_INTERNAL()\
+		}
 
 
 		/**
@@ -375,29 +399,6 @@ namespace Sa
 			__UTH_TEST_RESULT_INTERNAL()\
 		}
 
-
-		/**
-		*	\brief Run a \e <b> Unit Test </b> using internal Equals implementation.
-		*
-		*	UTH::exit will be equal to 1 if at least one test failed.
-		*
-		*	\param[in] _lhs		Left hand side operand to test.
-		*	\param[in] _rhs		Right hand side operand to test.
-		*
-		*	Additionnal params: 
-		*	uint32 size:		Size lenght to compare _lhs and _rhs are T*
-		*	T epsilon			Epsilon value to allow threshold.
-		*/
-		#define UTH_EQUALS_TEST(_lhs, _rhs, ...)\
-		{\
-			std::string titleStr = __UTH_TITLE "Sa::UTH::Equals(" #_lhs ", " #_rhs;\
-			titleStr += Sa::UTH::Internal::__SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ : "";\
-			titleStr += + ")" __UTH_LINE_STR;\
-			std::string paramStr = Sa::UTH::Internal::__ArgsToString(#_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, __VA_ARGS__);\
-		\
-			bool bRes = Sa::UTH::Internal::Equals(_lhs, _rhs, __VA_ARGS__);\
-			__UTH_TEST_RESULT_INTERNAL()\
-		}
 
 		/**
 		*	\brief Run tests grouped in a single function.
