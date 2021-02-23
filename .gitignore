@@ -1,0 +1,38 @@
+# Copyright 2020 Sapphire development team. All Rights Reserved.
+
+# Visual Studio cache.
+.vs/
+
+
+# Vim cache.
+*.swp
+
+
+# CMake cache.
+CMakeFiles/
+CMakeCache.txt
+Makefile
+*.cmake
+
+
+# Build and Temp files.
+[Bb]uild/
+[Bb]uilds/
+
+[Bb]in/
+
+[Tt]emp/
+[Tt]emps/
+[Tt]emporary/
+
+*.tmp
+
+
+# Log files
+[Ll]og/
+[Ll]ogs/
+
+
+# Documentation generated files
+html/
+latex/
