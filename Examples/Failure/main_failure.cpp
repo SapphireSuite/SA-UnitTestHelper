@@ -42,7 +42,9 @@ bool TestMethod(int _i, float _j)
 	return false;
 }
 
-int main()
+
+/// Methods with all the tests (can be in a separated file).
+void MainTests()
 {
 	// No verbosity.
 	UTH::verbosity = UTH::None;
@@ -71,7 +73,7 @@ int main()
 
 	UTH_MFUNC_TEST(v1, IsEqual, v2);
 	UTH_SFUNC_TEST(Vec2::Equals, v1, v2);
-	UTH_OP_TEST(v1, == , v2);
+	UTH_OP_TEST(v1, ==, v2);
 
 
 	// Equals tests.
@@ -92,6 +94,11 @@ int main()
 	UTH_EQUALS_TEST(ftab1, ftab2, 4u, FLT_EPSILON);
 
 	UTH_EQUALS_TEST(ftab1, ftab2, 3u);
+}
+
+int main()
+{
+	UTH_RUN_TESTS(MainTests());
 
 	return UTH::exit;
 }

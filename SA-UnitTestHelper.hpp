@@ -61,6 +61,21 @@ namespace Sa
 		*/
 		int exit = 0;
 
+		/**
+		*	\brief Local exit result from UTH_RUN_TESTS.
+		*
+		*	// TODO: Handle multithreading.
+		*	UTH::localExit is reset at each UTH_RUN_TESTS call.
+		*	UTH::localExit will be equal to 1 if at least one test failed.
+		*
+		*	localExit 0 == success.
+		*	localExit 1 == failure.
+		*/
+		int localExit = 0;
+
+		/// Quick log macro.
+		#define UTH_LOG(_str) std::cout << _str << std::endl;
+
 	#ifndef UTH_EXIT_ON_FAILURE
 		/**
 		*	\brief Wether to exit program on failure or continue next tests.
@@ -252,7 +267,7 @@ namespace Sa
 						SetConsoleTextAttribute(hConsole, 12);
 						break;
 					default:
-						std::cout << "CslColor not supported yet!" << std::endl;
+						UTH_LOG("CslColor not supported yet!");
 						break;
 				}
 			}
@@ -271,32 +286,32 @@ namespace Sa
 				if(!bRes)\
 				{\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Title);\
-					std::cout << titleStr << std::endl;\
+					UTH_LOG(titleStr)\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::None);\
 	\
 					if(Sa::UTH::verbosity & Sa::UTH::ParamsFailure)\
-						std::cout << paramStr << std::endl;\
+						std::cout << paramStr;\
 	\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Failure);\
-					std::cout << "Failure\n\n" << std::endl;\
+					UTH_LOG("Failure\n\n")\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::None);\
 	\
 					if constexpr(UTH_EXIT_ON_FAILURE)\
 						exit(EXIT_FAILURE);\
 					else\
-						Sa::UTH::exit = EXIT_FAILURE;\
+						Sa::UTH::exit = Sa::UTH::localExit = EXIT_FAILURE;\
 				}\
 				else if(Sa::UTH::verbosity & Sa::UTH::Success)\
 				{\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Title);\
-					std::cout << titleStr << std::endl;\
+					UTH_LOG(titleStr)\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::None);\
 	\
 					if(Sa::UTH::verbosity & UTH::ParamsSuccess)\
-						std::cout << paramStr << std::endl;\
+						std::cout << paramStr;\
 	\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Success);\
-					std::cout << "Success\n\n" << std::endl;\
+					UTH_LOG("Success\n\n")\
 					Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::None);\
 				}
 
@@ -382,6 +397,19 @@ namespace Sa
 		\
 			bool bRes = Sa::UTH::Internal::Equals(_lhs, _rhs, __VA_ARGS__);\
 			__UTH_TEST_RESULT_INTERNAL()\
+		}
+
+		/**
+		*	\brief Run tests grouped in a single function.
+		*
+		*	\param[in] _func	The function which own the group of tests.
+		*/
+		#define UTH_RUN_TESTS(_func)\
+		{\
+			UTH_LOG("=== Start: " #_func " ===");\
+			Sa::UTH::localExit = 0;\
+			_func;\
+			UTH_LOG("=== End: " #_func " local exit: " << Sa::UTH::localExit << " ===");\
 		}
 	}
 }

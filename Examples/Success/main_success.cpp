@@ -40,7 +40,9 @@ bool TestMethod(int _i, float _j)
 	return true;
 }
 
-int main()
+
+/// Methods with all the tests (can be in a separated file).
+void MainTests()
 {
 	// Print tests on success.
 	UTH::verbosity = UTH::Success;
@@ -89,6 +91,11 @@ int main()
 	UTH_EQUALS_TEST(ftab1, ftab1, 4u, FLT_EPSILON);
 
 	UTH_EQUALS_TEST(ftab1, ftab2, 3u);
+}
+
+int main()
+{
+	UTH_RUN_TESTS(MainTests());
 
 	return UTH::exit;
 }
