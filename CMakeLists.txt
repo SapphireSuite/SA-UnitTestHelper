@@ -7,26 +7,27 @@ cmake_minimum_required(VERSION 3.16)
 project(SA-UnitTestHelper)
 
 
-# === Output ===
-
-# Setup output directories for project.
-set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/Build/${CMAKE_BUILD_TYPE}_${CMAKE_HOST_SYSTEM_PROCESSOR})
-message("Output Directory: ${CMAKE_BINARY_DIR}")
-
-
 # === Input ===
 
-# Add this directory as include directory.
-# WARNING: **include_directories** is deprecated and only used for easier access to UnitTestHelper.hpp in examples. Use target_include_directories instead.
-include_directories(.)
+# Add interface library target.
+add_library(SA-UnitTestHelper INTERFACE)
+
+# Add SA-UnitTestHelper.hpp include directory.
+target_include_directories(SA-UnitTestHelper INTERFACE .)
 
 
-# === Testing ===
+# === Option ===
 
-# Enable testing for this directory and below.
-enable_testing()
+option(SA_UTH_EXAMPLES "Build SA-UnitTestHelper examples" OFF)
 
+if(SA_UTH_EXAMPLES)
+	# Setup output directories for project.
+	set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/Build/${CMAKE_BUILD_TYPE}_${CMAKE_HOST_SYSTEM_PROCESSOR})
+	message("Output Directory: ${CMAKE_BINARY_DIR}")
 
-# === Entrypoints ===
+	# Enable testing for this directory and below.
+	enable_testing()
 
-add_subdirectory(Examples)
+	# Add entries.
+	add_subdirectory(Examples)
+endif()
