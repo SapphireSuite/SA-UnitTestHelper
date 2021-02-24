@@ -6,3 +6,4 @@
 add_subdirectory(Success)
 add_subdirectory(Failure)
 add_subdirectory(Callback)
+add_subdirectory(Group)

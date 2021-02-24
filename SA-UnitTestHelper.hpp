@@ -5,8 +5,9 @@
 #ifndef SAPPHIRE_UNIT_TEST_HELPER_GUARD
 #define SAPPHIRE_UNIT_TEST_HELPER_GUARD
 
-#include <string>
+#include <stack>
 #include <vector>
+#include <string>
 #include <iostream>
 
 #if _WIN32
@@ -49,17 +50,6 @@ namespace Sa
 		*	exit 1 == failure.
 		*/
 		int exit = EXIT_SUCCESS;
-
-		///**
-		//*	\brief Local exit result from UTH_RUN_TESTS.
-		//*
-		//*	UTH::localExit is reset at each UTH_RUN_TESTS call.
-		//*	UTH::localExit will be equal to EXIT_FAILURE (1) if at least one test failed.
-		//*
-		//*	localExit 0 == success.
-		//*	localExit 1 == failure.
-		//*/
-		int localExit = EXIT_SUCCESS;
 
 #pragma endregion
 
@@ -105,15 +95,37 @@ namespace Sa
 		};
 
 
+		/// Infos generated from a group of tests.
+		struct Group
+		{
+			/// Name of the group.
+			const std::string name;
+
+			/*
+			*	\brief Local exit from tests of the group.
+			* 
+			*	UTH::localExit will be equal to EXIT_FAILURE (1) if at least one test of the group failed.
+			*
+			*	localExit 0 == success.
+			*	localExit 1 == failure.
+			*/
+			bool localExit = EXIT_SUCCESS;
+		};
+
+
 #pragma region Callback
 
 		namespace Internal
 		{
+			void DefaultGroupBeginCB(const std::string& _name);
+			void DefaultGroupEndCB(const Group& _group);
 			void DefaultTitleCB(const std::string& _funcDecl, unsigned int _lineNum);
 			void DefaultParamCB(const std::vector<ParamStr>& _paramStrs);
 			void DefaultResultCB(bool _pred);
 		}
 
+		void (*GroupBeginCB)(const std::string& _name) = Internal::DefaultGroupBeginCB;
+		void (*GroupEndCB)(const Group& _group) = Internal::DefaultGroupEndCB;
 		void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum) = Internal::DefaultTitleCB;
 		void (*ParamCB)(const std::vector<ParamStr>& _paramStrs) = Internal::DefaultParamCB;
 		void (*ResultCB)(bool _pred) = Internal::DefaultResultCB;
@@ -222,12 +234,43 @@ namespace Sa
 		/// Internal implementation namespace.
 		namespace Internal
 		{
-			/// Wether to continue output test with predicate _pred.
-			bool ShouldOutputTest(bool _pred)
+#pragma region Group
+
+			std::stack<Group> groups;
+
+			/// Start a new group of tests.
+			void GroupBegin(const std::string& _name)
 			{
-				return !_pred || (verbosity & Verbosity::Success);
+				groups.push(Group{ _name });
+
+				GroupBeginCB(_name);
 			}
 
+			/// End a group of tests.
+			Group GroupEnd()
+			{
+				Group group = groups.top();
+				groups.pop();
+
+				GroupEndCB(group);
+
+				return group;
+			}
+
+			/// Update current group from test result.
+			void GroupUpdate(bool _pred)
+			{
+				if (!groups.empty())
+				{
+					if (!_pred)
+						groups.top().localExit = EXIT_FAILURE;
+				}
+			}
+
+#pragma endregion
+
+
+#pragma region ComputeStr
 
 			/// Compute title from function declaration and line num.
 			void ComputeTitleStr(const std::string& _funcDecl, unsigned int _lineNum)
@@ -240,9 +283,8 @@ namespace Sa
 			template <typename... Args>
 			void ComputeParamStr(bool _pred, std::string _paramNames, const Args&... _args)
 			{
-				if ((_pred && (verbosity & Success) && (verbosity & ParamsSuccess)) ||	// Should output params on success.
-					(verbosity & ParamsFailure))										// Should output params on failure.
-
+				if (_pred && (verbosity & ParamsSuccess) ||		// Should output params on success.
+					!_pred && (verbosity & ParamsFailure))		// Should output params on failure.
 				{
 					std::vector<ParamStr> paramStrs;
 					GenerateParamStr(paramStrs, _paramNames, _args...);
@@ -280,6 +322,16 @@ namespace Sa
 #endif
 			}
 
+#pragma endregion
+
+
+#pragma region Misc
+
+			/// Wether to continue output test with predicate _pred.
+			bool ShouldOutputTest(bool _pred)
+			{
+				return !_pred || (verbosity & Verbosity::Success);
+			}
 
 			/// \brief Helper function for size of VA_ARGS (handle empty args).
 			template <typename... Args>
@@ -335,7 +387,35 @@ namespace Sa
 				(void)_result;
 			}
 		#endif
+
+#pragma endregion
+
 			
+#pragma region Callbacks
+
+			void DefaultGroupBeginCB(const std::string& _name)
+			{
+				UTH_LOG("=== Start " << _name << " ===\n");
+			}
+
+			void DefaultGroupEndCB(const Group& _group)
+			{
+				std::cout << "=== End " << _group.name << " exit with code: ";
+
+				if (_group.localExit == EXIT_SUCCESS)
+				{
+					SetConsoleColor(CslColor::Success);
+					std::cout << "EXIT_SUCCESS (" << EXIT_SUCCESS << ')';
+				}
+				else
+				{
+					SetConsoleColor(CslColor::Failure);
+					std::cout << "EXIT_FAILURE (" << EXIT_FAILURE << ')';
+				}
+
+				SetConsoleColor(CslColor::None);
+				UTH_LOG(" ===\n\n");
+			}
 
 			void DefaultTitleCB(const std::string& _funcDecl, unsigned int _lineNum)
 			{
@@ -371,6 +451,8 @@ namespace Sa
 					SetConsoleColor(CslColor::None);
 				}
 			}
+
+#pragma endregion
 		}
 		
 		/// \endcond
@@ -394,7 +476,9 @@ namespace Sa
 		#define UTH_EQUALS_TEST(_lhs, _rhs, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
+		\
 			bool bRes = UTH::Equals(_lhs, _rhs, __VA_ARGS__);\
+			GroupUpdate(bRes);\
 		\
 			if(ShouldOutputTest(bRes))\
 			{\
@@ -417,7 +501,9 @@ namespace Sa
 		#define UTH_SFUNC_TEST(_func, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
+		\
 			bool bRes = _func(__VA_ARGS__);\
+			GroupUpdate(bRes);\
 		\
 			if(ShouldOutputTest(bRes))\
 			{\
@@ -439,7 +525,9 @@ namespace Sa
 		#define UTH_MFUNC_TEST(_caller, _func, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
+		\
 			bool bRes = _caller._func(__VA_ARGS__);\
+			GroupUpdate(bRes);\
 		\
 			if(ShouldOutputTest(bRes))\
 			{\
@@ -462,7 +550,9 @@ namespace Sa
 		#define UTH_OP_TEST(_lhs, _op, _rhs)\
 		{\
 			using namespace Sa::UTH::Internal;\
+		\
 			bool bRes = _lhs _op _rhs;\
+			GroupUpdate(bRes);\
 		\
 			if(ShouldOutputTest(bRes))\
 			{\
@@ -472,52 +562,27 @@ namespace Sa
 			}\
 		}
 
-#pragma endregion
 
+		/// Begin a group of tests.
+		#define UTH_GROUP_BEGIN(_name) Sa::UTH::Internal::GroupBegin(#_name);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		/// End a group of tests.
+		#define UTH_GROUP_END() Sa::UTH::Internal::GroupEnd();
 
 
 		/**
-		*	\brief Run tests grouped in a single function.
+		*	\brief Run a group of tests from a single function.
 		*
 		*	\param[in] _func	The function which own the group of tests.
 		*/
 		#define UTH_RUN_TESTS(_func)\
 		{\
-			UTH_LOG("=== Start " #_func " ===");\
-			Sa::UTH::localExit = EXIT_SUCCESS;\
+			UTH_GROUP_BEGIN(#_func)\
 			_func;\
-		\
-			std::cout << "=== End " #_func " exit with code: ";\
-			if(Sa::UTH::localExit == EXIT_SUCCESS)\
-			{\
-				Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Success);\
-				std::cout << "EXIT_SUCCESS (" << EXIT_SUCCESS << ')';\
-			}\
-			else\
-			{\
-				Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Failure);\
-				std::cout << "EXIT_FAILURE (" << EXIT_FAILURE << ')';\
-			}\
-			Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::None);\
-			UTH_LOG(" ===\n\n");\
+			UTH_GROUP_END()\
 		}
+
+#pragma endregion
 	}
 }
 
