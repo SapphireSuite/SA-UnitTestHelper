@@ -54,24 +54,23 @@ namespace Sa
 		/**
 		*	\brief Exit result from unit testing.
 		*
-		*	UTH::exit will be equal to 1 if at least one test failed.
+		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
 		*
 		*	exit 0 == success.
 		*	exit 1 == failure.
 		*/
-		int exit = 0;
+		int exit = EXIT_SUCCESS;
 
 		/**
 		*	\brief Local exit result from UTH_RUN_TESTS.
 		*
-		*	// TODO: Handle multithreading.
 		*	UTH::localExit is reset at each UTH_RUN_TESTS call.
-		*	UTH::localExit will be equal to 1 if at least one test failed.
+		*	UTH::localExit will be equal to EXIT_FAILURE (1) if at least one test failed.
 		*
 		*	localExit 0 == success.
 		*	localExit 1 == failure.
 		*/
-		int localExit = 0;
+		int localExit = EXIT_SUCCESS;
 
 		/// Quick log macro.
 		#define UTH_LOG(_str) std::cout << _str << std::endl;
@@ -325,7 +324,7 @@ namespace Sa
 		/**
 		*	\brief Run a \e <b> Unit Test </b> using internal Equals implementation.
 		*
-		*	UTH::exit will be equal to 1 if at least one test failed.
+		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
 		*
 		*	\param[in] _lhs		Left hand side operand to test.
 		*	\param[in] _rhs		Right hand side operand to test.
@@ -349,7 +348,7 @@ namespace Sa
 		/**
 		*	\brief Run a \e <b> Unit Test </b> using a member function.
 		*
-		*	UTH::exit will be equal to 1 if at least one test failed.
+		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
 		*
 		*	\param[in] _caller	caller of the functin _func.
 		*	\param[in] _func	Function to test with ... args.
@@ -367,7 +366,7 @@ namespace Sa
 		/**
 		*	\brief Run a \e <b> Unit Test </b> using a static function.
 		*
-		*	UTH::exit will be equal to 1 if at least one test failed.
+		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
 		*
 		*	\param[in] _func	Function to test with ... args.
 		*/
@@ -384,7 +383,7 @@ namespace Sa
 		/**
 		*	\brief Run a \e <b> Unit Test </b> using an operator.
 		*
-		*	UTH::exit will be equal to 1 if at least one test failed.
+		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
 		*
 		*	\param[in] _lhs		Left hand side operand to test.
 		*	\param[in] _op		Operator of the test between _lhs and _rhs.
@@ -407,10 +406,23 @@ namespace Sa
 		*/
 		#define UTH_RUN_TESTS(_func)\
 		{\
-			UTH_LOG("=== Start: " #_func " ===");\
-			Sa::UTH::localExit = 0;\
+			UTH_LOG("=== Start " #_func " ===");\
+			Sa::UTH::localExit = EXIT_SUCCESS;\
 			_func;\
-			UTH_LOG("=== End: " #_func " local exit: " << Sa::UTH::localExit << " ===");\
+		\
+			std::cout << "=== End " #_func " exit with code: ";\
+			if(Sa::UTH::localExit == EXIT_SUCCESS)\
+			{\
+				Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Success);\
+				std::cout << "EXIT_SUCCESS (" << EXIT_SUCCESS << ')';\
+			}\
+			else\
+			{\
+				Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::Failure);\
+				std::cout << "EXIT_FAILURE (" << EXIT_FAILURE << ')';\
+			}\
+			Sa::UTH::Internal::SetConsoleColor(Sa::UTH::Internal::CslColor::None);\
+			UTH_LOG(" ===\n\n");\
 		}
 	}
 }
