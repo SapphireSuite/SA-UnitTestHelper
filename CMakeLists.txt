@@ -31,3 +31,5 @@ if(SA_UTH_EXAMPLES)
 	# Add entries.
 	add_subdirectory(Examples)
 endif()
+
+option(SA_UTH_EXIT_ON_FAILURE "Exit on first failure" OFF)
