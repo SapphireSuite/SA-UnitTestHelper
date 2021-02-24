@@ -3,6 +3,35 @@
 #include <SA-UnitTestHelper.hpp>
 using namespace Sa;
 
+void GroupBeginCB(const std::string& _name)
+{
+	UTH_LOG("Group of test[" << _name << "] started\n");
+}
+
+void GroupEndCB(const UTH::Group& _group)
+{
+	UTH_LOG("Group of test[" << _group.name << "] exit with code: " << _group.localExit << "\n");
+}
+
+void TitleCB(const std::string& _funcDecl, unsigned int _lineNum)
+{
+	UTH_LOG("Test:\t" << _funcDecl << " at line:" << _lineNum << '\n');
+}
+
+void ParamCB(const std::vector<UTH::ParamStr>& _paramStrs)
+{
+	for (auto it = _paramStrs.begin(); it != _paramStrs.end(); ++it)
+		UTH_LOG(it->name << ": [" << it->value << "]\n");
+}
+
+void ResultCB(bool _predicate)
+{
+	if (_predicate)
+		UTH_LOG("Result: Success\n")
+	else
+		UTH_LOG("Result: Failure\n")
+}
+
 /// Methods with all the tests (can be in a separated file).
 void MainTests()
 {
@@ -15,7 +44,12 @@ void MainTests()
 
 int main()
 {
-	UTH_RUN_TESTS(MainTests());
+	UTH::GroupBeginCB = GroupBeginCB;
+	UTH::GroupEndCB = GroupEndCB;
+	UTH::TitleCB = TitleCB;
+	UTH::ParamCB = ParamCB;
+	UTH::ResultCB = ResultCB;
+
 	UTH_RUN_TESTS(MainTests());
 
 	return UTH::exit;

@@ -577,7 +577,7 @@ namespace Sa
 		*/
 		#define UTH_RUN_TESTS(_func)\
 		{\
-			UTH_GROUP_BEGIN(#_func)\
+			UTH_GROUP_BEGIN(_func)\
 			_func;\
 			UTH_GROUP_END()\
 		}
