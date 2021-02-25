@@ -101,7 +101,7 @@ namespace Sa
 			/// Name of the group.
 			const std::string name;
 
-			/*
+			/**
 			*	\brief Local exit from tests of the group.
 			* 
 			*	UTH::localExit will be equal to EXIT_FAILURE (1) if at least one test of the group failed.
@@ -115,6 +115,8 @@ namespace Sa
 
 #pragma region Callback
 
+#ifndef DOXYGEN_SKIP
+
 		namespace Internal
 		{
 			void DefaultGroupBeginCB(const std::string& _name);
@@ -124,10 +126,21 @@ namespace Sa
 			void DefaultResultCB(bool _pred);
 		}
 
+#endif // DOXYGEN_SKIP
+
+		/// Callback called on groupe begin.
 		void (*GroupBeginCB)(const std::string& _name) = Internal::DefaultGroupBeginCB;
+		
+		/// Callback called on groupe end.
 		void (*GroupEndCB)(const Group& _group) = Internal::DefaultGroupEndCB;
+		
+		/// Callback called on test's title output.
 		void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum) = Internal::DefaultTitleCB;
+		
+		/// Callback called on test's parameters output.
 		void (*ParamCB)(const std::vector<ParamStr>& _paramStrs) = Internal::DefaultParamCB;
+		
+		/// Callback called on test's result output.
 		void (*ResultCB)(bool _pred) = Internal::DefaultResultCB;
 
 #pragma endregion
@@ -184,21 +197,50 @@ namespace Sa
 
 #pragma region Equals
 
-		/// \brief Helper Equals function.
+		/**
+		*	\brief Helper Equals function.
+		*
+		*	\tparam T		Type of operands.
+		*
+		*	\param[in] _lhs		Left hand side operand to compare.
+		*	\param[in] _rhs		Right hand side operand to compare.
+		* 
+		*	\return	True on equality, otherwise false.
+		*/
 		template <typename T>
 		bool Equals(const T& _lhs, const T& _rhs)
 		{
 			return _lhs == _rhs;
 		}
 
-		/// \brief Helper Equals function with epsilon.
+		/**
+		*	\brief Helper Equals function using epsilon.
+		*
+		*	\tparam T		Type of operands.
+		*
+		*	\param[in] _lhs		Left hand side operand to compare.
+		*	\param[in] _rhs		Right hand side operand to compare.
+		*	\param[in] _epsilon	Epsilon value for threshold compare.
+		* 
+		*	\return	True on equality, otherwise false.
+		*/
 		template <typename T>
 		bool Equals(const T& _lhs, const T& _rhs, const T& _epsilon)
 		{
 			return std::abs(_lhs - _rhs) < _epsilon;
 		}
 
-		/// \brief Helper Equals function for tab.
+		/**
+		*	\brief Helper Equals function for tab.
+		*
+		*	\tparam T		Type of operands.
+		*
+		*	\param[in] _lhs		Left hand side operand to compare.
+		*	\param[in] _rhs		Right hand side operand to compare.
+		*	\param[in] _size	Size of tabs to compare compare.
+		* 
+		*	\return	True on equality, otherwise false.
+		*/
 		template <typename T>
 		bool Equals(const T* _lhs, const T* _rhs, unsigned int _size)
 		{
@@ -211,7 +253,18 @@ namespace Sa
 			return true;
 		}
 
-		/// \brief Helper Equals function with epsilon for tab.
+		/**
+		*	\brief Helper Equals function for tab using epsilon.
+		*
+		*	\tparam T		Type of operands.
+		*
+		*	\param[in] _lhs		Left hand side operand to compare.
+		*	\param[in] _rhs		Right hand side operand to compare.
+		*	\param[in] _size	Size of tabs to compare compare.
+		*	\param[in] _epsilon	Epsilon value for threshold compare.
+		* 
+		*	\return	True on equality, otherwise false.
+		*/
 		template <typename T>
 		bool Equals(const T* _lhs, const T* _rhs, unsigned int _size, const T& _epsilon)
 		{
@@ -393,11 +446,23 @@ namespace Sa
 			
 #pragma region Callbacks
 
+			/**
+			*	\brief Default implementation of GroupBegin callback.
+			*	Log in console.
+			*
+			*	\param[in] _name	The name of the group that begins.
+			*/
 			void DefaultGroupBeginCB(const std::string& _name)
 			{
 				UTH_LOG("=== Start " << _name << " ===\n");
 			}
 
+			/**
+			*	\brief Default implementation of GroupEnd callback.
+			*	Log in console.
+			*
+			*	\param[in] _group	The group that ends.
+			*/
 			void DefaultGroupEndCB(const Group& _group)
 			{
 				std::cout << "=== End " << _group.name << " exit with code: ";
@@ -417,6 +482,13 @@ namespace Sa
 				UTH_LOG(" ===\n\n");
 			}
 
+			/**
+			*	\brief Default implementation of <b>title output</b> callback.
+			*	Log in console.
+			*
+			*	\param[in] _funcDecl	Declaration of the function as a string.
+			*	\param[in] _lineNum		Line number of the function's call.
+			*/
 			void DefaultTitleCB(const std::string& _funcDecl, unsigned int _lineNum)
 			{
 				SetConsoleColor(CslColor::Title);
@@ -426,15 +498,27 @@ namespace Sa
 				SetConsoleColor(CslColor::None);
 			}
 
+			/**
+			*	\brief Default implementation of <b>parameters output</b> callback.
+			*	Log in console.
+			*
+			*	\param[in] _paramStrs	Every param infos extracted from call.
+			*/
 			void DefaultParamCB(const std::vector<ParamStr>& _paramStrs)
 			{
 				for (auto it = _paramStrs.begin(); it != _paramStrs.end(); ++it)
 					UTH_LOG(it->name << ":\n" << it->value << '\n');
 			}
 
-			void DefaultResultCB(bool _predicate)
+			/**
+			*	\brief Default implementation of <b>result output</b> callback.
+			*	Log in console.
+			*
+			*	\param[_pred]	Result of the test.
+			*/
+			void DefaultResultCB(bool _pred)
 			{
-				if (_predicate)
+				if (_pred)
 				{
 					SetConsoleColor(CslColor::Success);
 
