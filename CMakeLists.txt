@@ -18,9 +18,10 @@ target_include_directories(SA-UnitTestHelper INTERFACE .)
 
 # === Option ===
 
-option(SA_UTH_EXAMPLES "Build SA-UnitTestHelper examples" OFF)
+# Build examples.
+option(UTH_EXAMPLES "Build SA-UnitTestHelper examples" OFF)
 
-if(SA_UTH_EXAMPLES)
+if(UTH_EXAMPLES)
 	# Setup output directories for project.
 	set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/Build/${CMAKE_BUILD_TYPE}_${CMAKE_HOST_SYSTEM_PROCESSOR})
 	message("Output Directory: ${CMAKE_BINARY_DIR}")
@@ -32,4 +33,10 @@ if(SA_UTH_EXAMPLES)
 	add_subdirectory(Examples)
 endif()
 
-option(SA_UTH_EXIT_ON_FAILURE "Exit on first failure" OFF)
+
+# Test exit on first failure.
+option(UTH_EXIT_ON_FAILURE "Exit on first failure" OFF)
+
+if(UTH_EXIT_ON_FAILURE)
+	target_compile_definitions(SA-UnitTestHelper INTERFACE UTH_EXIT_ON_FAILURE)
+endif()

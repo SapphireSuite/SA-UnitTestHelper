@@ -30,12 +30,12 @@ namespace Sa
 		/// Quick log macro.
 		#define UTH_LOG(_str) std::cout << _str << std::endl;
 
-	#ifndef SA_UTH_EXIT_ON_FAILURE
+	#ifndef UTH_EXIT_ON_FAILURE
 		/**
 		*	\brief Wether to exit program on failure or continue next tests.
 		*	Can be defined during compilation.
 		*/
-		#define SA_UTH_EXIT_ON_FAILURE 0
+		#define UTH_EXIT_ON_FAILURE 0
 	#endif
 
 
@@ -369,9 +369,9 @@ namespace Sa
 
 				ResultCB(_pred);
 
-#if SA_UTH_EXIT_ON_FAILURE
+#if UTH_EXIT_ON_FAILURE
 				if(!_pred)
-					exit(EXIT_FAILURE);
+					::exit(EXIT_FAILURE);
 #endif
 			}
 
