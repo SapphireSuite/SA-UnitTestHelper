@@ -27,19 +27,34 @@ namespace Sa
 	/// UnitTestHelper global namespace.
 	namespace UTH
 	{
+#pragma region Log
+
 		/// Quick log macro.
 		#define SA_UTH_LOG(_str) std::cout << _str << std::endl;
+
+	#ifndef SA_UTH_DEFAULT_CSL_LOG
+		/**
+		*	\brief Wether to log tests in console by default.
+		*	Can be defined within cmake options or before including the header.
+		*/
+		#define SA_UTH_DEFAULT_CSL_LOG 0
+	#endif
+
+		/// Dynamic console log toogle.
+		bool bCslLog = SA_UTH_DEFAULT_CSL_LOG;
+
+#pragma endregion
+
+
+#pragma region Exit
 
 	#ifndef SA_UTH_EXIT_ON_FAILURE
 		/**
 		*	\brief Wether to exit program on failure or continue next tests.
-		*	Can be defined during compilation.
+		*	Can be defined within cmake options or before including the header.
 		*/
 		#define SA_UTH_EXIT_ON_FAILURE 0
 	#endif
-
-
-#pragma region Exit
 
 		/**
 		*	\brief Exit result from unit testing.
@@ -115,36 +130,23 @@ namespace Sa
 
 #pragma region Callback
 
-#ifndef DOXYGEN_SKIP
-
-		namespace Internal
-		{
-			void DefaultGroupBeginCB(const std::string& _name);
-			void DefaultGroupEndCB(const Group& _group);
-			void DefaultTitleCB(const std::string& _funcDecl, unsigned int _lineNum);
-			void DefaultParamsCB(const std::vector<Param>& _params);
-			void DefaultResultCB(bool _pred);
-		}
-
-#endif // DOXYGEN_SKIP
-
 		/// Pointer to allow user to get custom data in callbacks.
 		void* UserData = nullptr;
 
 		/// Callback called on groupe begin.
-		void (*GroupBeginCB)(const std::string& _name) = Internal::DefaultGroupBeginCB;
+		void (*GroupBeginCB)(const std::string& _name) = nullptr;
 		
 		/// Callback called on groupe end.
-		void (*GroupEndCB)(const Group& _group) = Internal::DefaultGroupEndCB;
+		void (*GroupEndCB)(const Group& _group) = nullptr;
 		
 		/// Callback called on test's title output.
-		void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum) = Internal::DefaultTitleCB;
+		void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum) = nullptr;
 		
 		/// Callback called on test's parameters output.
-		void (*ParamsCB)(const std::vector<Param>& _params) = Internal::DefaultParamsCB;
+		void (*ParamsCB)(const std::vector<Param>& _params) = nullptr;
 		
 		/// Callback called on test's result output.
-		void (*ResultCB)(bool _pred) = Internal::DefaultResultCB;
+		void (*ResultCB)(bool _pred) = nullptr;
 
 #pragma endregion
 
@@ -290,112 +292,7 @@ namespace Sa
 		/// Internal implementation namespace.
 		namespace Internal
 		{
-#pragma region Group
-
-			std::stack<Group> groups;
-
-			/// Start a new group of tests.
-			void GroupBegin(const std::string& _name)
-			{
-				groups.push(Group{ _name });
-
-				GroupBeginCB(_name);
-			}
-
-			/// End a group of tests.
-			Group GroupEnd()
-			{
-				Group group = groups.top();
-				groups.pop();
-
-				GroupEndCB(group);
-
-				return group;
-			}
-
-			/// Update current group from test result.
-			void GroupUpdate(bool _pred)
-			{
-				if (!groups.empty())
-				{
-					if (!_pred)
-						groups.top().localExit = EXIT_FAILURE;
-				}
-			}
-
-#pragma endregion
-
-
-#pragma region ComputeStr
-
-			/// Compute title from function declaration and line num.
-			void ComputeTitleStr(const std::string& _funcDecl, unsigned int _lineNum)
-			{
-				TitleCB(_funcDecl, _lineNum);
-			}
-
-
-			/// Compute params.
-			template <typename... Args>
-			void ComputeParamStr(bool _pred, std::string _paramNames, const Args&... _args)
-			{
-				if (_pred && (verbosity & ParamsSuccess) ||		// Should output params on success.
-					!_pred && (verbosity & ParamsFailure))		// Should output params on failure.
-				{
-					std::vector<Param> params;
-					GenerateParamStr(params, _paramNames, _args...);
-
-					ParamsCB(params);
-				}
-			}
-
-			/// \brief Generate Params from params' names and values.
-			template <typename FirstT, typename... Args>
-			void GenerateParamStr(std::vector<Param>& _result, std::string _paramNames, const FirstT& _first, const Args&... _args)
-			{
-				unsigned int index = _paramNames.find_first_of(',');
-
-				_result.push_back(Param{ _paramNames.substr(0u, index), ToString(_first) });
-
-				if constexpr (sizeof...(_args))
-					GenerateParamStr(_result, _paramNames.substr(index + 2), _args...);
-			}
-
-
-			/// Compute the result using _pred predicate.
-			void ComputeResult(bool _pred)
-			{
-				if(_pred)
-					Sa::UTH::exit = EXIT_SUCCESS;
-				else
-					Sa::UTH::exit = EXIT_FAILURE;
-
-				ResultCB(_pred);
-
-#if SA_UTH_EXIT_ON_FAILURE
-				if(!_pred)
-					::exit(EXIT_FAILURE);
-#endif
-			}
-
-#pragma endregion
-
-
-#pragma region Misc
-
-			/// Wether to continue output test with predicate _pred.
-			bool ShouldOutputTest(bool _pred)
-			{
-				return !_pred || (verbosity & Verbosity::Success);
-			}
-
-			/// \brief Helper function for size of VA_ARGS (handle empty args).
-			template <typename... Args>
-			unsigned int SizeOfArgs(const Args&... _args)
-			{
-				return sizeof...(_args);
-			}
-
+#pragma region Log
 
 			/// enum for console colors.
 			enum class CslColor
@@ -444,29 +341,22 @@ namespace Sa
 			}
 		#endif
 
-#pragma endregion
-
-			
-#pragma region Callbacks
-
 			/**
-			*	\brief Default implementation of GroupBegin callback.
-			*	Log in console.
+			*	\brief GroupBegin output in console.
 			*
 			*	\param[in] _name	The name of the group that begins.
 			*/
-			void DefaultGroupBeginCB(const std::string& _name)
+			void GroupBeginCslLog(const std::string& _name)
 			{
 				SA_UTH_LOG("=== Start " << _name << " ===\n");
 			}
 
 			/**
-			*	\brief Default implementation of GroupEnd callback.
-			*	Log in console.
+			*	\brief GroupEnd output in console.
 			*
 			*	\param[in] _group	The group that ends.
 			*/
-			void DefaultGroupEndCB(const Group& _group)
+			void GroupEndCslLog(const Group& _group)
 			{
 				std::cout << "=== End " << _group.name << " exit with code: ";
 
@@ -486,40 +376,37 @@ namespace Sa
 			}
 
 			/**
-			*	\brief Default implementation of <b>title output</b> callback.
-			*	Log in console.
+			*	\brief Test title output in console.
 			*
 			*	\param[in] _funcDecl	Declaration of the function as a string.
 			*	\param[in] _lineNum		Line number of the function's call.
 			*/
-			void DefaultTitleCB(const std::string& _funcDecl, unsigned int _lineNum)
+			void TitleCslLog(const std::string& _funcDecl, unsigned int _lineNum)
 			{
 				SetConsoleColor(CslColor::Title);
 
 				SA_UTH_LOG("[SA-UTH] Test:\t" << _funcDecl << " -- l:" << _lineNum << '\n');
-				
+
 				SetConsoleColor(CslColor::None);
 			}
 
 			/**
-			*	\brief Default implementation of <b>parameters output</b> callback.
-			*	Log in console.
+			*	\brief Test parameters output in console.
 			*
 			*	\param[in] _paramStrs	Every param infos extracted from call.
 			*/
-			void DefaultParamsCB(const std::vector<Param>& _params)
+			void ParamsCslLog(const std::vector<Param>& _params)
 			{
 				for (auto it = _params.begin(); it != _params.end(); ++it)
 					SA_UTH_LOG(it->name << ":\n" << it->value << '\n');
 			}
 
 			/**
-			*	\brief Default implementation of <b>result output</b> callback.
-			*	Log in console.
+			*	\brief Test result output in console.
 			*
 			*	\param[_pred]	Result of the test.
 			*/
-			void DefaultResultCB(bool _pred)
+			void ResultCslLog(bool _pred)
 			{
 				if (_pred)
 				{
@@ -532,11 +419,144 @@ namespace Sa
 				else
 				{
 					SetConsoleColor(CslColor::Failure);
-					
+
 					SA_UTH_LOG("Failure\n\n");
-					
+
 					SetConsoleColor(CslColor::None);
 				}
+			}
+
+#pragma endregion
+
+
+#pragma region Group
+
+			std::stack<Group> groups;
+
+			/// Start a new group of tests.
+			void GroupBegin(const std::string& _name)
+			{
+				groups.push(Group{ _name });
+
+				if (bCslLog)
+					GroupBeginCslLog(_name);
+
+				if(GroupBeginCB)
+					GroupBeginCB(_name);
+			}
+
+			/// End a group of tests.
+			Group GroupEnd()
+			{
+				Group group = groups.top();
+				groups.pop();
+
+				if (bCslLog)
+					GroupEndCslLog(group);
+
+				if(GroupEndCB)
+					GroupEndCB(group);
+
+				return group;
+			}
+
+			/// Update current group from test result.
+			void GroupUpdate(bool _pred)
+			{
+				if (!groups.empty())
+				{
+					if (!_pred)
+						groups.top().localExit = EXIT_FAILURE;
+				}
+			}
+
+#pragma endregion
+
+
+#pragma region ComputeStr
+
+			/// Compute title from function declaration and line num.
+			void ComputeTitleStr(const std::string& _funcDecl, unsigned int _lineNum)
+			{
+				if (bCslLog)
+					TitleCslLog(_funcDecl, _lineNum);
+
+				if(TitleCB)
+					TitleCB(_funcDecl, _lineNum);
+			}
+
+
+			/// Compute params.
+			template <typename... Args>
+			void ComputeParamStr(bool _pred, std::string _paramNames, const Args&... _args)
+			{
+				// No need to compute params.
+				if (!bCslLog && !ParamsCB)
+					return;
+
+				if (_pred && (verbosity & ParamsSuccess) ||		// Should output params on success.
+					!_pred && (verbosity & ParamsFailure))		// Should output params on failure.
+				{
+					std::vector<Param> params;
+					GenerateParamStr(params, _paramNames, _args...);
+
+					if (bCslLog)
+						ParamsCslLog(params);
+
+					if(ParamsCB)
+						ParamsCB(params);
+				}
+			}
+
+			/// \brief Generate Params from params' names and values.
+			template <typename FirstT, typename... Args>
+			void GenerateParamStr(std::vector<Param>& _result, std::string _paramNames, const FirstT& _first, const Args&... _args)
+			{
+				unsigned int index = _paramNames.find_first_of(',');
+
+				_result.push_back(Param{ _paramNames.substr(0u, index), ToString(_first) });
+
+				if constexpr (sizeof...(_args))
+					GenerateParamStr(_result, _paramNames.substr(index + 2), _args...);
+			}
+
+
+			/// Compute the result using _pred predicate.
+			void ComputeResult(bool _pred)
+			{
+				if(_pred)
+					Sa::UTH::exit = EXIT_SUCCESS;
+				else
+					Sa::UTH::exit = EXIT_FAILURE;
+
+				if (bCslLog)
+					ResultCslLog(_pred);
+
+				if(ResultCB)
+					ResultCB(_pred);
+
+#if SA_UTH_EXIT_ON_FAILURE
+				if(!_pred)
+					::exit(EXIT_FAILURE);
+#endif
+			}
+
+#pragma endregion
+
+
+#pragma region Misc
+
+			/// Wether to continue computing test with predicate _pred.
+			bool ShouldComputeTest(bool _pred)
+			{
+				return !_pred || (verbosity & Verbosity::Success);
+			}
+
+			/// \brief Helper function for size of VA_ARGS (handle empty args).
+			template <typename... Args>
+			unsigned int SizeOfArgs(const Args&... _args)
+			{
+				return sizeof...(_args);
 			}
 
 #pragma endregion
@@ -567,7 +587,7 @@ namespace Sa
 			bool bRes = UTH::Equals(_lhs, _rhs, __VA_ARGS__);\
 			GroupUpdate(bRes);\
 		\
-			if(ShouldOutputTest(bRes))\
+			if(ShouldComputeTest(bRes))\
 			{\
 				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + (SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
 			\
@@ -592,7 +612,7 @@ namespace Sa
 			bool bRes = _func(__VA_ARGS__);\
 			GroupUpdate(bRes);\
 		\
-			if(ShouldOutputTest(bRes))\
+			if(ShouldComputeTest(bRes))\
 			{\
 				ComputeTitleStr(#_func "(" #__VA_ARGS__ ")", __LINE__);\
 				ComputeParamStr(bRes, #__VA_ARGS__, __VA_ARGS__);\
@@ -616,7 +636,7 @@ namespace Sa
 			bool bRes = _caller._func(__VA_ARGS__);\
 			GroupUpdate(bRes);\
 		\
-			if(ShouldOutputTest(bRes))\
+			if(ShouldComputeTest(bRes))\
 			{\
 				ComputeTitleStr(#_caller "." #_func "(" #__VA_ARGS__ ")", __LINE__);\
 				ComputeParamStr(bRes, #_caller ", " #__VA_ARGS__, _caller, __VA_ARGS__);\
@@ -641,7 +661,7 @@ namespace Sa
 			bool bRes = _lhs _op _rhs;\
 			GroupUpdate(bRes);\
 		\
-			if(ShouldOutputTest(bRes))\
+			if(ShouldComputeTest(bRes))\
 			{\
 				ComputeTitleStr(#_lhs " " #_op " " #_rhs, __LINE__);\
 				ComputeParamStr(bRes, #_lhs ", " #_rhs, _lhs, _rhs);\

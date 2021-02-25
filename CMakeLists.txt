@@ -34,6 +34,14 @@ if(SA_UTH_EXAMPLES)
 endif()
 
 
+# Default console log toggle value.
+option(SA_UTH_DEFAULT_CSL_LOG "Should Log tests in console by default" ON)
+
+if(SA_UTH_DEFAULT_CSL_LOG)
+	target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_DEFAULT_CSL_LOG)
+endif()
+
+
 # Test exit on first failure.
 option(SA_UTH_EXIT_ON_FAILURE "Exit on first failure" OFF)
 

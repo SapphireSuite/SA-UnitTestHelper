@@ -44,6 +44,10 @@ void MainTests()
 
 int main()
 {
+	// Disable default console log.
+	UTH::bCslLog = false;
+
+	// Set Callbacks.
 	UTH::GroupBeginCB = GroupBeginCB;
 	UTH::GroupEndCB = GroupEndCB;
 	UTH::TitleCB = TitleCB;
