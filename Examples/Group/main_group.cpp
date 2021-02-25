@@ -27,8 +27,8 @@ void GroupTests_Failure()
 
 int main()
 {
-	UTH_RUN_TESTS(GroupTests_Success());
-	UTH_RUN_TESTS(GroupTests_Failure());
+	UTH_GROUP_TESTS(GroupTests_Success());
+	UTH_GROUP_TESTS(GroupTests_Failure());
 
 	return UTH::exit;
 }

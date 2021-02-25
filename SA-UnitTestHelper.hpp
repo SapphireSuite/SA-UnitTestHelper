@@ -85,7 +85,7 @@ namespace Sa
 
 		
 		/// Pair of param name and value.
-		struct ParamStr
+		struct Param
 		{
 			/// Param's name.
 			std::string name;
@@ -122,11 +122,14 @@ namespace Sa
 			void DefaultGroupBeginCB(const std::string& _name);
 			void DefaultGroupEndCB(const Group& _group);
 			void DefaultTitleCB(const std::string& _funcDecl, unsigned int _lineNum);
-			void DefaultParamCB(const std::vector<ParamStr>& _paramStrs);
+			void DefaultParamCB(const std::vector<Param>& _params);
 			void DefaultResultCB(bool _pred);
 		}
 
 #endif // DOXYGEN_SKIP
+
+		/// Pointer to allow user to get custom data in callbacks.
+		void* UserData = nullptr;
 
 		/// Callback called on groupe begin.
 		void (*GroupBeginCB)(const std::string& _name) = Internal::DefaultGroupBeginCB;
@@ -138,7 +141,7 @@ namespace Sa
 		void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum) = Internal::DefaultTitleCB;
 		
 		/// Callback called on test's parameters output.
-		void (*ParamCB)(const std::vector<ParamStr>& _paramStrs) = Internal::DefaultParamCB;
+		void (*ParamCB)(const std::vector<Param>& _paramStrs) = Internal::DefaultParamCB;
 		
 		/// Callback called on test's result output.
 		void (*ResultCB)(bool _pred) = Internal::DefaultResultCB;
@@ -339,20 +342,20 @@ namespace Sa
 				if (_pred && (verbosity & ParamsSuccess) ||		// Should output params on success.
 					!_pred && (verbosity & ParamsFailure))		// Should output params on failure.
 				{
-					std::vector<ParamStr> paramStrs;
-					GenerateParamStr(paramStrs, _paramNames, _args...);
+					std::vector<Param> params;
+					GenerateParamStr(params, _paramNames, _args...);
 
-					ParamCB(paramStrs);
+					ParamCB(params);
 				}
 			}
 
-			/// \brief Generate ParamStrs from params' names and values.
+			/// \brief Generate Params from params' names and values.
 			template <typename FirstT, typename... Args>
-			void GenerateParamStr(std::vector<ParamStr>& _result, std::string _paramNames, const FirstT& _first, const Args&... _args)
+			void GenerateParamStr(std::vector<Param>& _result, std::string _paramNames, const FirstT& _first, const Args&... _args)
 			{
 				unsigned int index = _paramNames.find_first_of(',');
 
-				_result.push_back(ParamStr{ _paramNames.substr(0u, index), ToString(_first) });
+				_result.push_back(Param{ _paramNames.substr(0u, index), ToString(_first) });
 
 				if constexpr (sizeof...(_args))
 					GenerateParamStr(_result, _paramNames.substr(index + 2), _args...);
@@ -504,9 +507,9 @@ namespace Sa
 			*
 			*	\param[in] _paramStrs	Every param infos extracted from call.
 			*/
-			void DefaultParamCB(const std::vector<ParamStr>& _paramStrs)
+			void DefaultParamCB(const std::vector<Param>& _params)
 			{
-				for (auto it = _paramStrs.begin(); it != _paramStrs.end(); ++it)
+				for (auto it = _params.begin(); it != _params.end(); ++it)
 					UTH_LOG(it->name << ":\n" << it->value << '\n');
 			}
 
@@ -659,7 +662,7 @@ namespace Sa
 		*
 		*	\param[in] _func	The function which own the group of tests.
 		*/
-		#define UTH_RUN_TESTS(_func)\
+		#define UTH_GROUP_TESTS(_func)\
 		{\
 			UTH_GROUP_BEGIN(_func)\
 			_func;\

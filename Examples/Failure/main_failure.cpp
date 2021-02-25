@@ -98,7 +98,7 @@ void MainTests()
 
 int main()
 {
-	UTH_RUN_TESTS(MainTests());
+	UTH_GROUP_TESTS(MainTests());
 
 	return UTH::exit;
 }

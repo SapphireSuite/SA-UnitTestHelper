@@ -18,9 +18,9 @@ void TitleCB(const std::string& _funcDecl, unsigned int _lineNum)
 	UTH_LOG("Test:\t" << _funcDecl << " at line:" << _lineNum << '\n');
 }
 
-void ParamCB(const std::vector<UTH::ParamStr>& _paramStrs)
+void ParamCB(const std::vector<UTH::Param>& _params)
 {
-	for (auto it = _paramStrs.begin(); it != _paramStrs.end(); ++it)
+	for (auto it = _params.begin(); it != _params.end(); ++it)
 		UTH_LOG(it->name << ": [" << it->value << "]\n");
 }
 
@@ -50,7 +50,7 @@ int main()
 	UTH::ParamCB = ParamCB;
 	UTH::ResultCB = ResultCB;
 
-	UTH_RUN_TESTS(MainTests());
+	UTH_GROUP_TESTS(MainTests());
 
 	return UTH::exit;
 }
