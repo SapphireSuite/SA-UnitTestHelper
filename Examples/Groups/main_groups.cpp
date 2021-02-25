@@ -7,28 +7,28 @@ using namespace Sa;
 void GroupTests_Success()
 {
 	int i = 5;
-	UTH_EQUALS_TEST(i, i);
+	SA_UTH_EQUALS(i, i);
 }
 
 void GroupTests_Failure()
 {
 	int i = 5;
 	int j = 9;
-	UTH_EQUALS_TEST(i, j);
+	SA_UTH_EQUALS(i, j);
 
 
 	// Create subgroup manually with name "TestSubGroup".
-	UTH_GROUP_BEGIN(TestSubGroup);
+	SA_UTH_GROUP_BEGIN(TestSubGroup);
 
-	UTH_EQUALS_TEST(i, i);
+	SA_UTH_EQUALS(i, i);
 
-	UTH_GROUP_END();
+	SA_UTH_GROUP_END();
 }
 
 int main()
 {
-	UTH_GROUP_TESTS(GroupTests_Success());
-	UTH_GROUP_TESTS(GroupTests_Failure());
+	SA_UTH_GROUP(GroupTests_Success());
+	SA_UTH_GROUP(GroupTests_Failure());
 
 	return UTH::exit;
 }

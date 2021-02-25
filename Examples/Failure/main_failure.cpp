@@ -50,7 +50,7 @@ void MainTests()
 	UTH::verbosity = UTH::None;
 
 
-	UTH_SFUNC_TEST(TestMethod, 8, 3.45f);
+	SA_UTH_SFUNC(TestMethod, 8, 3.45f);
 
 
 	// Output param's value.
@@ -60,7 +60,7 @@ void MainTests()
 	// Single method test.
 	int i = 4;
 	float j = 12.11f;
-	UTH_SFUNC_TEST(TestMethod, i, j);
+	SA_UTH_SFUNC(TestMethod, i, j);
 
 
 	// Output params' value and name.
@@ -71,34 +71,34 @@ void MainTests()
 	Vec2 v1{ 1.0f, 2.0f };
 	Vec2 v2{ 1.0f, 2.0f };
 
-	UTH_MFUNC_TEST(v1, IsEqual, v2);
-	UTH_SFUNC_TEST(Vec2::Equals, v1, v2);
-	UTH_OP_TEST(v1, ==, v2);
+	SA_UTH_MFUNC(v1, IsEqual, v2);
+	SA_UTH_SFUNC(Vec2::Equals, v1, v2);
+	SA_UTH_OP(v1, ==, v2);
 
 
 	// Equals tests.
 	// Single elem.
 	float f1 = 45.3654f;
 	float f2 = 3.4f;
-	UTH_EQUALS_TEST(f1, f2);
-	UTH_EQUALS_TEST(f1, f2, FLT_EPSILON);
+	SA_UTH_EQUALS(f1, f2);
+	SA_UTH_EQUALS(f1, f2, FLT_EPSILON);
 
-	UTH_EQUALS_TEST(v1, v2);
+	SA_UTH_EQUALS(v1, v2);
 
 
 	// Tab.
 	float ftab1[] = { 45.3654f, 983.64f, 1.254f, 4.25f };
 	float ftab2[] = { 4.15f, 983.64f, 1.254f, 4.25f };
 
-	UTH_EQUALS_TEST(ftab1, ftab2, 4u);
-	UTH_EQUALS_TEST(ftab1, ftab2, 4u, FLT_EPSILON);
+	SA_UTH_EQUALS(ftab1, ftab2, 4u);
+	SA_UTH_EQUALS(ftab1, ftab2, 4u, FLT_EPSILON);
 
-	UTH_EQUALS_TEST(ftab1, ftab2, 3u);
+	SA_UTH_EQUALS(ftab1, ftab2, 3u);
 }
 
 int main()
 {
-	UTH_GROUP_TESTS(MainTests());
+	SA_UTH_GROUP(MainTests());
 
 	return UTH::exit;
 }

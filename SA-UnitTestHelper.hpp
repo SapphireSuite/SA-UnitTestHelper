@@ -28,14 +28,14 @@ namespace Sa
 	namespace UTH
 	{
 		/// Quick log macro.
-		#define UTH_LOG(_str) std::cout << _str << std::endl;
+		#define SA_UTH_LOG(_str) std::cout << _str << std::endl;
 
-	#ifndef UTH_EXIT_ON_FAILURE
+	#ifndef SA_UTH_EXIT_ON_FAILURE
 		/**
 		*	\brief Wether to exit program on failure or continue next tests.
 		*	Can be defined during compilation.
 		*/
-		#define UTH_EXIT_ON_FAILURE 0
+		#define SA_UTH_EXIT_ON_FAILURE 0
 	#endif
 
 
@@ -372,7 +372,7 @@ namespace Sa
 
 				ResultCB(_pred);
 
-#if UTH_EXIT_ON_FAILURE
+#if SA_UTH_EXIT_ON_FAILURE
 				if(!_pred)
 					::exit(EXIT_FAILURE);
 #endif
@@ -433,7 +433,7 @@ namespace Sa
 						SetConsoleTextAttribute(hConsole, 12);
 						break;
 					default:
-						UTH_LOG("CslColor not supported yet!");
+						SA_UTH_LOG("CslColor not supported yet!");
 						break;
 				}
 			}
@@ -457,7 +457,7 @@ namespace Sa
 			*/
 			void DefaultGroupBeginCB(const std::string& _name)
 			{
-				UTH_LOG("=== Start " << _name << " ===\n");
+				SA_UTH_LOG("=== Start " << _name << " ===\n");
 			}
 
 			/**
@@ -482,7 +482,7 @@ namespace Sa
 				}
 
 				SetConsoleColor(CslColor::None);
-				UTH_LOG(" ===\n\n");
+				SA_UTH_LOG(" ===\n\n");
 			}
 
 			/**
@@ -496,7 +496,7 @@ namespace Sa
 			{
 				SetConsoleColor(CslColor::Title);
 
-				UTH_LOG("[SA-UTH] Test:\t" << _funcDecl << " -- l:" << _lineNum << '\n');
+				SA_UTH_LOG("[SA-UTH] Test:\t" << _funcDecl << " -- l:" << _lineNum << '\n');
 				
 				SetConsoleColor(CslColor::None);
 			}
@@ -510,7 +510,7 @@ namespace Sa
 			void DefaultParamsCB(const std::vector<Param>& _params)
 			{
 				for (auto it = _params.begin(); it != _params.end(); ++it)
-					UTH_LOG(it->name << ":\n" << it->value << '\n');
+					SA_UTH_LOG(it->name << ":\n" << it->value << '\n');
 			}
 
 			/**
@@ -525,7 +525,7 @@ namespace Sa
 				{
 					SetConsoleColor(CslColor::Success);
 
-					UTH_LOG("Success\n\n");
+					SA_UTH_LOG("Success\n\n");
 
 					SetConsoleColor(CslColor::None);
 				}
@@ -533,7 +533,7 @@ namespace Sa
 				{
 					SetConsoleColor(CslColor::Failure);
 					
-					UTH_LOG("Failure\n\n");
+					SA_UTH_LOG("Failure\n\n");
 					
 					SetConsoleColor(CslColor::None);
 				}
@@ -560,7 +560,7 @@ namespace Sa
 		*	uint32 size:		Size lenght to compare _lhs and _rhs are T*
 		*	T epsilon			Epsilon value to allow threshold.
 		*/
-		#define UTH_EQUALS_TEST(_lhs, _rhs, ...)\
+		#define SA_UTH_EQUALS(_lhs, _rhs, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -585,7 +585,7 @@ namespace Sa
 		*
 		*	\param[in] _func	Function to test with ... args.
 		*/
-		#define UTH_SFUNC_TEST(_func, ...)\
+		#define SA_UTH_SFUNC(_func, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -609,7 +609,7 @@ namespace Sa
 		*	\param[in] _caller	caller of the functin _func.
 		*	\param[in] _func	Function to test with ... args.
 		*/
-		#define UTH_MFUNC_TEST(_caller, _func, ...)\
+		#define SA_UTH_MFUNC(_caller, _func, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -634,7 +634,7 @@ namespace Sa
 		*	\param[in] _op		Operator of the test between _lhs and _rhs.
 		*	\param[in] _rhs		Right hand side operand to test.
 		*/
-		#define UTH_OP_TEST(_lhs, _op, _rhs)\
+		#define SA_UTH_OP(_lhs, _op, _rhs)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -651,10 +651,10 @@ namespace Sa
 
 
 		/// Begin a group of tests.
-		#define UTH_GROUP_BEGIN(_name) Sa::UTH::Internal::GroupBegin(#_name);
+		#define SA_UTH_GROUP_BEGIN(_name) Sa::UTH::Internal::GroupBegin(#_name);
 
 		/// End a group of tests.
-		#define UTH_GROUP_END() Sa::UTH::Internal::GroupEnd();
+		#define SA_UTH_GROUP_END() Sa::UTH::Internal::GroupEnd();
 
 
 		/**
@@ -662,11 +662,11 @@ namespace Sa
 		*
 		*	\param[in] _func	The function which own the group of tests.
 		*/
-		#define UTH_GROUP_TESTS(_func)\
+		#define SA_UTH_GROUP(_func)\
 		{\
-			UTH_GROUP_BEGIN(_func)\
+			SA_UTH_GROUP_BEGIN(_func)\
 			_func;\
-			UTH_GROUP_END()\
+			SA_UTH_GROUP_END()\
 		}
 
 #pragma endregion
