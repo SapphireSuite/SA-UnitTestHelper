@@ -18,7 +18,7 @@ void TitleCB(const std::string& _funcDecl, unsigned int _lineNum)
 	UTH_LOG("Test:\t" << _funcDecl << " at line:" << _lineNum << '\n');
 }
 
-void ParamCB(const std::vector<UTH::Param>& _params)
+void ParamsCB(const std::vector<UTH::Param>& _params)
 {
 	for (auto it = _params.begin(); it != _params.end(); ++it)
 		UTH_LOG(it->name << ": [" << it->value << "]\n");
@@ -47,7 +47,7 @@ int main()
 	UTH::GroupBeginCB = GroupBeginCB;
 	UTH::GroupEndCB = GroupEndCB;
 	UTH::TitleCB = TitleCB;
-	UTH::ParamCB = ParamCB;
+	UTH::ParamsCB = ParamsCB;
 	UTH::ResultCB = ResultCB;
 
 	UTH_GROUP_TESTS(MainTests());

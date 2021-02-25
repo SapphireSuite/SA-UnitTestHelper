@@ -5,5 +5,5 @@
 
 add_subdirectory(Success)
 add_subdirectory(Failure)
-add_subdirectory(Callback)
-add_subdirectory(Group)
+add_subdirectory(Callbacks)
+add_subdirectory(Groups)

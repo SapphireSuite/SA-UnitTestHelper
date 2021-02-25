@@ -122,7 +122,7 @@ namespace Sa
 			void DefaultGroupBeginCB(const std::string& _name);
 			void DefaultGroupEndCB(const Group& _group);
 			void DefaultTitleCB(const std::string& _funcDecl, unsigned int _lineNum);
-			void DefaultParamCB(const std::vector<Param>& _params);
+			void DefaultParamsCB(const std::vector<Param>& _params);
 			void DefaultResultCB(bool _pred);
 		}
 
@@ -141,7 +141,7 @@ namespace Sa
 		void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum) = Internal::DefaultTitleCB;
 		
 		/// Callback called on test's parameters output.
-		void (*ParamCB)(const std::vector<Param>& _paramStrs) = Internal::DefaultParamCB;
+		void (*ParamsCB)(const std::vector<Param>& _params) = Internal::DefaultParamsCB;
 		
 		/// Callback called on test's result output.
 		void (*ResultCB)(bool _pred) = Internal::DefaultResultCB;
@@ -345,7 +345,7 @@ namespace Sa
 					std::vector<Param> params;
 					GenerateParamStr(params, _paramNames, _args...);
 
-					ParamCB(params);
+					ParamsCB(params);
 				}
 			}
 
@@ -507,7 +507,7 @@ namespace Sa
 			*
 			*	\param[in] _paramStrs	Every param infos extracted from call.
 			*/
-			void DefaultParamCB(const std::vector<Param>& _params)
+			void DefaultParamsCB(const std::vector<Param>& _params)
 			{
 				for (auto it = _params.begin(); it != _params.end(); ++it)
 					UTH_LOG(it->name << ":\n" << it->value << '\n');
