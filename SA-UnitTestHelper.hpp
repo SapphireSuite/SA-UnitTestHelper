@@ -66,6 +66,12 @@ namespace Sa
 		*/
 		int exit = EXIT_SUCCESS;
 
+		/**
+		*	\brief Helper exit program macro.
+		*	Should be used at end of main.
+		*/
+		#define SA_UTH_EXIT() return Sa::UTH::exit;
+
 #pragma endregion
 
 

@@ -97,5 +97,6 @@ int main()
 {
 	SA_UTH_GROUP(MainTests());
 
-	return UTH::exit;
+
+	SA_UTH_EXIT()
 }

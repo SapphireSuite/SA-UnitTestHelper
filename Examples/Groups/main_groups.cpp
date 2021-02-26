@@ -30,5 +30,6 @@ int main()
 	SA_UTH_GROUP(GroupTests_Success());
 	SA_UTH_GROUP(GroupTests_Failure());
 
-	return UTH::exit;
+
+	SA_UTH_EXIT()
 }
