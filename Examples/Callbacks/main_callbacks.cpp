@@ -5,6 +5,9 @@ using namespace Sa;
 
 void GroupBeginCB(const std::string& _name)
 {
+	// Get UserData.
+	int& myUserData = UTH::GetUserData<int>();
+
 	SA_UTH_LOG("Group of test[" << _name << "] started\n");
 }
 
@@ -46,6 +49,10 @@ int main()
 {
 	// Disable default console log.
 	UTH::bCslLog = false;
+
+	// Set UserData.
+	int myUserData = 9;
+	UTH::UserData = &myUserData;
 
 	// Set Callbacks.
 	UTH::GroupBeginCB = GroupBeginCB;

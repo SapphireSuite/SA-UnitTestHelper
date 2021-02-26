@@ -139,6 +139,16 @@ namespace Sa
 		/// Pointer to allow user to get custom data in callbacks.
 		void* UserData = nullptr;
 
+		/**
+		*	\brief Helper get user data with type.
+		*
+		*	\tparam T	The type to cast user data.
+		*
+		*	\return User data casted as T.
+		*/
+		template<typename T>
+		T& GetUserData() { return *reinterpret_cast<T*>(UserData); }
+
 		/// Callback called on groupe begin.
 		void (*GroupBeginCB)(const std::string& _name) = nullptr;
 		
