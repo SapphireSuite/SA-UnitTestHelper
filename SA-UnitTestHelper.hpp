@@ -532,7 +532,7 @@ namespace Sa
 
 				_result.push_back(Param{ _paramNames.substr(0u, index), ToString(_first) });
 
-				if constexpr (sizeof...(_args))
+				if constexpr (sizeof...(_args) != 0)
 					GenerateParamStr(_result, _paramNames.substr(index + 2), _args...);
 			}
 
