@@ -328,6 +328,7 @@ namespace Sa
 
 #pragma endregion
 
+
 #pragma region Random
 
 		/**
@@ -344,6 +345,17 @@ namespace Sa
 		{
 			return _min + static_cast<T>(rand()) / static_cast<T>(RAND_MAX/(_max - _min));
 		}
+
+		/**
+		*	\brief Rand specialization for bool.
+		* 
+		*	\param[in] _min		Min bound (false) (included).
+		*	\param[in] _max		Max bound (true) (included).
+		*
+		*	\return Random bool.
+		*/
+		template<>
+		bool Rand(bool _min, bool _max) { return Rand<int>(0, 2) == 1; }
 
 #pragma endregion
 
@@ -644,6 +656,7 @@ namespace Sa
 		/// \endcond
 
 #pragma endregion
+
 
 #pragma region Macro
 
