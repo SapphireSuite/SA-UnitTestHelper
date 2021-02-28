@@ -47,6 +47,9 @@ void MainTests()
 
 int main()
 {
+	SA_UTH_INIT();
+
+
 	// Disable default console log.
 	UTH::bCslLog = false;
 
@@ -64,5 +67,5 @@ int main()
 	SA_UTH_GROUP(MainTests());
 
 
-	SA_UTH_EXIT()
+	SA_UTH_EXIT();
 }

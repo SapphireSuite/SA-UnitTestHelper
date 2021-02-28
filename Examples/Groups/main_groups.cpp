@@ -27,9 +27,12 @@ void GroupTests_Failure()
 
 int main()
 {
+	SA_UTH_INIT();
+
+
 	SA_UTH_GROUP(GroupTests_Success());
 	SA_UTH_GROUP(GroupTests_Failure());
 
 
-	SA_UTH_EXIT()
+	SA_UTH_EXIT();
 }

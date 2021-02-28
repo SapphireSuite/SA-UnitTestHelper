@@ -46,7 +46,24 @@ namespace Sa
 #pragma endregion
 
 
-#pragma region Exit
+#pragma region Init / Exit
+
+		/**
+		*	\brief Init function to be called at the start of main.
+		*	Use SA_UTH_INIT() as helper macro.
+		*/
+		void Init()
+		{
+			// Init rand.
+			srand(time(NULL));
+		}
+
+		/**
+		*	\brief Helper init program macro.
+		*	Should be used at the start of main.
+		*/
+		#define SA_UTH_INIT() Sa::UTH::Init();
+
 
 	#ifndef SA_UTH_EXIT_ON_FAILURE
 		/**
@@ -67,10 +84,21 @@ namespace Sa
 		int exit = EXIT_SUCCESS;
 
 		/**
-		*	\brief Helper exit program macro.
-		*	Should be used at end of main.
+		*	\brief Exit function to be called at the end of main.
+		*	Use SA_UTH_EXIT() as helper macro.
+		* 
+		*	\return exit code of all tests run.
 		*/
-		#define SA_UTH_EXIT() return Sa::UTH::exit;
+		int Exit()
+		{
+			return exit;
+		}
+
+		/**
+		*	\brief Helper exit program macro.
+		*	Should be used at the end of main.
+		*/
+		#define SA_UTH_EXIT() return Sa::UTH::Exit();
 
 #pragma endregion
 
@@ -296,6 +324,25 @@ namespace Sa
 			}
 
 			return true;
+		}
+
+#pragma endregion
+
+#pragma region Random
+
+		/**
+		*	\brief Rand between [min, max[ (max excluded).
+		* 
+		*	\tparam T			Type of the rand.
+		*	\param[in] _min		Min bound for rand (included).
+		*	\param[in] _max		Max bound for rand (excluded).
+		* 
+		*	\return Random T between [min, max[ (max excluded).
+		*/
+		template <typename T>
+		T Rand(T _min = T(0), T _max = T(1))
+		{
+			return _min + static_cast<T>(rand()) / static_cast<T>(RAND_MAX/(_max - _min));
 		}
 
 #pragma endregion
