@@ -27,51 +27,7 @@ namespace Sa
 	/// UnitTestHelper global namespace.
 	namespace UTH
 	{
-#pragma region Log
-
-		/// Quick log macro.
-		#define SA_UTH_LOG(_str) std::cout << _str << std::endl;
-
-	#ifndef SA_UTH_DEFAULT_CSL_LOG
-		/**
-		*	\brief Wether to log tests in console by default.
-		*	Can be defined within cmake options or before including the header.
-		*/
-		#define SA_UTH_DEFAULT_CSL_LOG 0
-	#endif
-
-		/// Dynamic console log toogle.
-		bool bCslLog = SA_UTH_DEFAULT_CSL_LOG;
-
-#pragma endregion
-
-
-#pragma region Init / Exit
-
-		/**
-		*	\brief Init function to be called at the start of main.
-		*	Use SA_UTH_INIT() as helper macro.
-		*/
-		void Init()
-		{
-			// Init rand.
-			srand(time(NULL));
-		}
-
-		/**
-		*	\brief Helper init program macro.
-		*	Should be used at the start of main.
-		*/
-		#define SA_UTH_INIT() Sa::UTH::Init();
-
-
-	#ifndef SA_UTH_EXIT_ON_FAILURE
-		/**
-		*	\brief Wether to exit program on failure or continue next tests.
-		*	Can be defined within cmake options or before including the header.
-		*/
-		#define SA_UTH_EXIT_ON_FAILURE 0
-	#endif
+#pragma region Types & Vars
 
 		/**
 		*	\brief Exit result from unit testing.
@@ -83,24 +39,13 @@ namespace Sa
 		*/
 		int exit = EXIT_SUCCESS;
 
+	#ifndef SA_UTH_EXIT_ON_FAILURE
 		/**
-		*	\brief Exit function to be called at the end of main.
-		*	Use SA_UTH_EXIT() as helper macro.
-		* 
-		*	\return exit code of all tests run.
+		*	\brief Wether to exit program on failure or continue next tests.
+		*	Can be defined within cmake options or before including the header.
 		*/
-		int Exit()
-		{
-			return exit;
-		}
-
-		/**
-		*	\brief Helper exit program macro.
-		*	Should be used at the end of main.
-		*/
-		#define SA_UTH_EXIT() return Sa::UTH::Exit();
-
-#pragma endregion
+		#define SA_UTH_EXIT_ON_FAILURE 0
+	#endif
 
 
 #pragma region Verbosity
@@ -161,6 +106,267 @@ namespace Sa
 			bool localExit = EXIT_SUCCESS;
 		};
 
+#pragma endregion
+
+
+#pragma region Log
+
+		/// Quick log macro.
+		#define SA_UTH_LOG(_str) std::cout << _str << std::endl;
+
+	#ifndef SA_UTH_DEFAULT_CSL_LOG
+		/**
+		*	\brief Wether to log tests in console by default.
+		*	Can be defined within cmake options or before including the header.
+		*/
+		#define SA_UTH_DEFAULT_CSL_LOG 0
+	#endif
+
+		/// Dynamic console log toogle.
+		bool bCslLog = SA_UTH_DEFAULT_CSL_LOG;
+
+		/// \cond Internal
+
+		/// Internal implementation namespace.
+		namespace Internal
+		{
+			/// enum for console colors.
+			enum class CslColor
+			{
+				/// Default color.
+				None,
+
+				/// UTH Color for init.
+				Init,
+
+				/// UTH Color for exit.
+				Exit,
+
+				/// Color used for test's titles.
+				Title,
+
+				/// Color used on test success.
+				Success,
+
+				/// Color used on test failure.
+				Failure,
+
+				/// Color used for group begin.
+				GroupBegin,
+
+				/// Color used for group begin.
+				GroupEnd,
+			};
+
+		#if _WIN32
+			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			void SetConsoleColor(CslColor _result)
+			{
+				switch (_result)
+				{
+					case CslColor::None:
+						SetConsoleTextAttribute(hConsole, 15);
+						break;
+					case CslColor::Title:
+						SetConsoleTextAttribute(hConsole, 14);
+						break;
+					case CslColor::Success:
+						SetConsoleTextAttribute(hConsole, 10);
+						break;
+					case CslColor::Failure:
+						SetConsoleTextAttribute(hConsole, 12);
+						break;
+					case CslColor::GroupBegin:
+						SetConsoleTextAttribute(hConsole, 3);
+						break;
+					case CslColor::GroupEnd:
+						SetConsoleTextAttribute(hConsole, 3);
+						break;
+					case CslColor::Init:
+						SetConsoleTextAttribute(hConsole, 13);
+						break;
+					case CslColor::Exit:
+						SetConsoleTextAttribute(hConsole, 13);
+						break;
+					default:
+						SA_UTH_LOG("CslColor not supported yet!");
+						break;
+				}
+			}
+		#else
+			void SetConsoleColor(CslColor _result)
+			{
+				(void)_result;
+			}
+		#endif
+
+
+			/**
+			*	\brief GroupBegin output in console.
+			*
+			*	\param[in] _name	The name of the group that begins.
+			*/
+			void GroupBeginCslLog(const std::string& _name)
+			{
+				SetConsoleColor(CslColor::GroupBegin);
+				SA_UTH_LOG("[SA-UTH] Group:\t" << _name << '\n');
+				SetConsoleColor(CslColor::None);
+			}
+
+			/**
+			*	\brief GroupEnd output in console.
+			*
+			*	\param[in] _group	The group that ends.
+			*/
+			void GroupEndCslLog(const class UTH::Group& _group)
+			{
+				SetConsoleColor(CslColor::GroupEnd);
+				std::cout << "[SA-UTH] Group:\t" << _group.name << " exit with code: ";
+
+				if (_group.localExit == EXIT_SUCCESS)
+				{
+					SetConsoleColor(CslColor::Success);
+					std::cout << "EXIT_SUCCESS (" << EXIT_SUCCESS << ')';
+				}
+				else
+				{
+					SetConsoleColor(CslColor::Failure);
+					std::cout << "EXIT_FAILURE (" << EXIT_FAILURE << ')';
+				}
+
+				SetConsoleColor(CslColor::GroupEnd);
+				SA_UTH_LOG("\n\n");
+				SetConsoleColor(CslColor::None);
+			}
+
+			/**
+			*	\brief Test title output in console.
+			*
+			*	\param[in] _funcDecl	Declaration of the function as a string.
+			*	\param[in] _lineNum		Line number of the function's call.
+			*/
+			void TitleCslLog(const std::string& _funcDecl, unsigned int _lineNum)
+			{
+				SetConsoleColor(CslColor::Title);
+
+				SA_UTH_LOG("[SA-UTH] Test:\t" << _funcDecl << " -- l:" << _lineNum << '\n');
+
+				SetConsoleColor(CslColor::None);
+			}
+
+
+			/**
+			*	\brief Test parameters output in console.
+			*
+			*	\param[in] _paramStrs	Every param infos extracted from call.
+			*/
+			void ParamsCslLog(const std::vector<Param>& _params)
+			{
+				for (auto it = _params.begin(); it != _params.end(); ++it)
+					SA_UTH_LOG(it->name << ":\n" << it->value << '\n');
+			}
+
+
+			/**
+			*	\brief Test result output in console.
+			*
+			*	\param[_pred]	Result of the test.
+			*/
+			void ResultCslLog(bool _pred)
+			{
+				if (_pred)
+				{
+					SetConsoleColor(CslColor::Success);
+
+					SA_UTH_LOG("Success\n\n");
+
+					SetConsoleColor(CslColor::None);
+				}
+				else
+				{
+					SetConsoleColor(CslColor::Failure);
+
+					SA_UTH_LOG("Failure\n\n");
+
+					SetConsoleColor(CslColor::None);
+				}
+			}
+		}
+
+		/// \endcond
+
+#pragma endregion
+
+
+#pragma region Init / Exit
+
+		/**
+		*	\brief Init function to be called at the start of main.
+		*	Use SA_UTH_INIT() as helper macro.
+		*/
+		void Init()
+		{
+			using namespace Internal;
+
+			SetConsoleColor(CslColor::Init);
+			SA_UTH_LOG("[SA-UTH] Init:");
+
+			// Init rand.
+			time_t seed = time(NULL);
+			srand(seed);
+			SA_UTH_LOG("[SA-UTH] Rand seed: " << seed);
+			
+			SA_UTH_LOG('\n');
+			SetConsoleColor(CslColor::None);
+		}
+
+		/**
+		*	\brief Helper init program macro.
+		*	Should be used at the start of main.
+		*/
+		#define SA_UTH_INIT() Sa::UTH::Init();
+
+
+		/**
+		*	\brief Exit function to be called at the end of main.
+		*	Use SA_UTH_EXIT() as helper macro.
+		* 
+		*	\return exit code of all tests run.
+		*/
+		int Exit()
+		{
+			using namespace Internal;
+
+			SetConsoleColor(CslColor::Exit);
+			std::cout << "[SA-UTH] Exit with code: ";
+
+			if (exit == EXIT_SUCCESS)
+			{
+				SetConsoleColor(CslColor::Success);
+				std::cout << "EXIT_SUCCESS (" << EXIT_SUCCESS << ')';
+			}
+			else
+			{
+				SetConsoleColor(CslColor::Failure);
+				std::cout << "EXIT_FAILURE (" << EXIT_FAILURE << ')';
+			}
+
+			SA_UTH_LOG('\n');
+
+			SetConsoleColor(CslColor::None);
+
+			return exit;
+		}
+
+		/**
+		*	\brief Helper exit program macro.
+		*	Should be used at the end of main.
+		*/
+		#define SA_UTH_EXIT() return Sa::UTH::Exit();
+
+#pragma endregion
+
 
 #pragma region Callback
 
@@ -191,6 +397,57 @@ namespace Sa
 		
 		/// Callback called on test's result output.
 		void (*ResultCB)(bool _pred) = nullptr;
+
+#pragma endregion
+
+
+#pragma region Group
+
+		/// \cond Internal
+
+		namespace Internal
+		{
+			std::stack<Group> groups;
+
+			/// Start a new group of tests.
+			void GroupBegin(const std::string& _name)
+			{
+				groups.push(Group{ _name });
+
+				if (bCslLog)
+					GroupBeginCslLog(_name);
+
+				if (GroupBeginCB)
+					GroupBeginCB(_name);
+			}
+
+			/// End a group of tests.
+			Group GroupEnd()
+			{
+				Group group = groups.top();
+				groups.pop();
+
+				if (bCslLog)
+					GroupEndCslLog(group);
+
+				if (GroupEndCB)
+					GroupEndCB(group);
+
+				return group;
+			}
+
+			/// Update current group from test result.
+			void GroupUpdate(bool _pred)
+			{
+				if (!groups.empty())
+				{
+					if (!_pred)
+						groups.top().localExit = EXIT_FAILURE;
+				}
+			}
+		}
+
+		/// \endcond Internal
 
 #pragma endregion
 
@@ -360,219 +617,19 @@ namespace Sa
 #pragma endregion
 
 
-#pragma region Internal
+#pragma region ComputeStr
 
 		/// \cond Internal
 
-		/// Internal implementation namespace.
 		namespace Internal
 		{
-#pragma region Log
-
-			/// enum for console colors.
-			enum class CslColor
-			{
-				/// Default color.
-				None,
-
-				/// Color used for test's titles.
-				Title,
-
-				/// Color used on test success.
-				Success,
-
-				/// Color used on test failure.
-				Failure,
-
-				/// Color used for group begin.
-				GroupBegin,
-
-				/// Color used for group begin.
-				GroupEnd,
-			};
-
-		#if _WIN32
-			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-			void SetConsoleColor(CslColor _result)
-			{
-				switch (_result)
-				{
-					case CslColor::None:
-						SetConsoleTextAttribute(hConsole, 15);
-						break;
-					case CslColor::Title:
-						SetConsoleTextAttribute(hConsole, 14);
-						break;
-					case CslColor::Success:
-						SetConsoleTextAttribute(hConsole, 10);
-						break;
-					case CslColor::Failure:
-						SetConsoleTextAttribute(hConsole, 12);
-						break;
-					case CslColor::GroupBegin:
-						SetConsoleTextAttribute(hConsole, 3);
-						break;
-					case CslColor::GroupEnd:
-						SetConsoleTextAttribute(hConsole, 3);
-						break;
-					default:
-						SA_UTH_LOG("CslColor not supported yet!");
-						break;
-				}
-			}
-		#else
-			void SetConsoleColor(CslColor _result)
-			{
-				(void)_result;
-			}
-		#endif
-
-			/**
-			*	\brief GroupBegin output in console.
-			*
-			*	\param[in] _name	The name of the group that begins.
-			*/
-			void GroupBeginCslLog(const std::string& _name)
-			{
-				SetConsoleColor(CslColor::GroupBegin);
-				SA_UTH_LOG("=== Start " << _name << " ===\n");
-				SetConsoleColor(CslColor::None);
-			}
-
-			/**
-			*	\brief GroupEnd output in console.
-			*
-			*	\param[in] _group	The group that ends.
-			*/
-			void GroupEndCslLog(const Group& _group)
-			{
-				SetConsoleColor(CslColor::GroupEnd);
-				std::cout << "=== End " << _group.name << " exit with code: ";
-
-				if (_group.localExit == EXIT_SUCCESS)
-				{
-					SetConsoleColor(CslColor::Success);
-					std::cout << "EXIT_SUCCESS (" << EXIT_SUCCESS << ')';
-				}
-				else
-				{
-					SetConsoleColor(CslColor::Failure);
-					std::cout << "EXIT_FAILURE (" << EXIT_FAILURE << ')';
-				}
-
-				SetConsoleColor(CslColor::GroupEnd);
-				SA_UTH_LOG(" ===\n\n");
-				SetConsoleColor(CslColor::None);
-			}
-
-			/**
-			*	\brief Test title output in console.
-			*
-			*	\param[in] _funcDecl	Declaration of the function as a string.
-			*	\param[in] _lineNum		Line number of the function's call.
-			*/
-			void TitleCslLog(const std::string& _funcDecl, unsigned int _lineNum)
-			{
-				SetConsoleColor(CslColor::Title);
-
-				SA_UTH_LOG("[SA-UTH] Test:\t" << _funcDecl << " -- l:" << _lineNum << '\n');
-
-				SetConsoleColor(CslColor::None);
-			}
-
-			/**
-			*	\brief Test parameters output in console.
-			*
-			*	\param[in] _paramStrs	Every param infos extracted from call.
-			*/
-			void ParamsCslLog(const std::vector<Param>& _params)
-			{
-				for (auto it = _params.begin(); it != _params.end(); ++it)
-					SA_UTH_LOG(it->name << ":\n" << it->value << '\n');
-			}
-
-			/**
-			*	\brief Test result output in console.
-			*
-			*	\param[_pred]	Result of the test.
-			*/
-			void ResultCslLog(bool _pred)
-			{
-				if (_pred)
-				{
-					SetConsoleColor(CslColor::Success);
-
-					SA_UTH_LOG("Success\n\n");
-
-					SetConsoleColor(CslColor::None);
-				}
-				else
-				{
-					SetConsoleColor(CslColor::Failure);
-
-					SA_UTH_LOG("Failure\n\n");
-
-					SetConsoleColor(CslColor::None);
-				}
-			}
-
-#pragma endregion
-
-
-#pragma region Group
-
-			std::stack<Group> groups;
-
-			/// Start a new group of tests.
-			void GroupBegin(const std::string& _name)
-			{
-				groups.push(Group{ _name });
-
-				if (bCslLog)
-					GroupBeginCslLog(_name);
-
-				if(GroupBeginCB)
-					GroupBeginCB(_name);
-			}
-
-			/// End a group of tests.
-			Group GroupEnd()
-			{
-				Group group = groups.top();
-				groups.pop();
-
-				if (bCslLog)
-					GroupEndCslLog(group);
-
-				if(GroupEndCB)
-					GroupEndCB(group);
-
-				return group;
-			}
-
-			/// Update current group from test result.
-			void GroupUpdate(bool _pred)
-			{
-				if (!groups.empty())
-				{
-					if (!_pred)
-						groups.top().localExit = EXIT_FAILURE;
-				}
-			}
-
-#pragma endregion
-
-
-#pragma region ComputeStr
-
 			/// Compute title from function declaration and line num.
 			void ComputeTitleStr(const std::string& _funcDecl, unsigned int _lineNum)
 			{
 				if (bCslLog)
 					TitleCslLog(_funcDecl, _lineNum);
 
-				if(TitleCB)
+				if (TitleCB)
 					TitleCB(_funcDecl, _lineNum);
 			}
 
@@ -594,7 +651,7 @@ namespace Sa
 					if (bCslLog)
 						ParamsCslLog(params);
 
-					if(ParamsCB)
+					if (ParamsCB)
 						ParamsCB(params);
 				}
 			}
@@ -615,7 +672,7 @@ namespace Sa
 			/// Compute the result using _pred predicate.
 			void ComputeResult(bool _pred)
 			{
-				if(_pred)
+				if (_pred)
 					Sa::UTH::exit = EXIT_SUCCESS;
 				else
 					Sa::UTH::exit = EXIT_FAILURE;
@@ -623,19 +680,14 @@ namespace Sa
 				if (bCslLog)
 					ResultCslLog(_pred);
 
-				if(ResultCB)
+				if (ResultCB)
 					ResultCB(_pred);
 
 #if SA_UTH_EXIT_ON_FAILURE
-				if(!_pred)
+				if (!_pred)
 					::exit(EXIT_FAILURE);
 #endif
 			}
-
-#pragma endregion
-
-
-#pragma region Misc
 
 			/// Wether to continue computing test with predicate _pred.
 			bool ShouldComputeTest(bool _pred)
@@ -649,10 +701,8 @@ namespace Sa
 			{
 				return sizeof...(_args);
 			}
-
-#pragma endregion
 		}
-		
+
 		/// \endcond
 
 #pragma endregion
