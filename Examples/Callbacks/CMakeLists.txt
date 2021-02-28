@@ -1,7 +1,7 @@
 # Copyright (c) 2021 Sapphire Development Team. All Rights Reserved.
 
 
-# === Output ===
+# === Input ===
 
 # Add executable target built from sources.
 add_executable(UnitTestCallbacks main_callbacks.cpp)
