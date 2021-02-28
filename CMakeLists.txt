@@ -16,6 +16,12 @@ add_library(SA-UnitTestHelper INTERFACE)
 target_include_directories(SA-UnitTestHelper INTERFACE .)
 
 
+# === Compile features ===
+
+# Standard
+target_compile_features(SA-UnitTestHelper INTERFACE cxx_std_17)
+
+
 # === Option ===
 
 # Build examples.
