@@ -323,7 +323,13 @@ namespace Sa
 				Success,
 
 				/// Color used on test failure.
-				Failure
+				Failure,
+
+				/// Color used for group begin.
+				GroupBegin,
+
+				/// Color used for group begin.
+				GroupEnd,
 			};
 
 		#if _WIN32
@@ -345,6 +351,12 @@ namespace Sa
 					case CslColor::Failure:
 						SetConsoleTextAttribute(hConsole, 12);
 						break;
+					case CslColor::GroupBegin:
+						SetConsoleTextAttribute(hConsole, 3);
+						break;
+					case CslColor::GroupEnd:
+						SetConsoleTextAttribute(hConsole, 3);
+						break;
 					default:
 						SA_UTH_LOG("CslColor not supported yet!");
 						break;
@@ -364,7 +376,9 @@ namespace Sa
 			*/
 			void GroupBeginCslLog(const std::string& _name)
 			{
+				SetConsoleColor(CslColor::GroupBegin);
 				SA_UTH_LOG("=== Start " << _name << " ===\n");
+				SetConsoleColor(CslColor::None);
 			}
 
 			/**
@@ -374,6 +388,7 @@ namespace Sa
 			*/
 			void GroupEndCslLog(const Group& _group)
 			{
+				SetConsoleColor(CslColor::GroupEnd);
 				std::cout << "=== End " << _group.name << " exit with code: ";
 
 				if (_group.localExit == EXIT_SUCCESS)
@@ -387,8 +402,9 @@ namespace Sa
 					std::cout << "EXIT_FAILURE (" << EXIT_FAILURE << ')';
 				}
 
-				SetConsoleColor(CslColor::None);
+				SetConsoleColor(CslColor::GroupEnd);
 				SA_UTH_LOG(" ===\n\n");
+				SetConsoleColor(CslColor::None);
 			}
 
 			/**
