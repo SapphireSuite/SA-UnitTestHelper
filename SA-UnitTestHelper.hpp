@@ -8,7 +8,9 @@
 #include <stack>
 #include <vector>
 #include <string>
+#include <fstream>
 #include <iostream>
+#include <filesystem> 
 
 #if _WIN32
 
@@ -106,13 +108,6 @@ namespace Sa
 			bool localExit = EXIT_SUCCESS;
 		};
 
-#pragma endregion
-
-
-#pragma region Log
-
-		/// Quick log macro.
-		#define SA_UTH_LOG(_str) std::cout << _str << std::endl;
 
 	#ifndef SA_UTH_DEFAULT_CSL_LOG
 		/**
@@ -125,9 +120,44 @@ namespace Sa
 		/// Dynamic console log toogle.
 		bool bCslLog = SA_UTH_DEFAULT_CSL_LOG;
 
+
+	#ifndef SA_UTH_DEFAULT_FILE_LOG
+		/**
+		*	\brief Wether to log tests in file by default.
+		*	Can be defined within cmake options or before including the header.
+		*/
+		#define SA_UTH_DEFAULT_FILE_LOG 0
+	#endif
+
+		/// Dynamic file log toogle.
+		bool bFileLog = SA_UTH_DEFAULT_FILE_LOG;
+
 		/// \cond Internal
 
 		/// Internal implementation namespace.
+		namespace Internal
+		{
+			std::fstream logFile;
+			std::string logFileName;
+		}
+
+		/// \endcond
+
+#pragma endregion
+
+
+#pragma region Log
+
+		/// Quick log macro.
+		#define SA_UTH_LOG(_str)\
+		{\
+			if (bCslLog) std::cout << _str << std::endl;\
+			if (bFileLog) Sa::UTH::Internal::logFile << _str << std::endl;\
+		}
+
+
+		/// \cond Internal
+
 		namespace Internal
 		{
 			/// enum for console colors.
@@ -201,13 +231,65 @@ namespace Sa
 			}
 		#endif
 
+			/**
+			*	\brief Open the output log file.
+			*
+			*	\param[in] _time	Time used to name the log file.
+			*/
+			void OpenLogFile(time_t _time)
+			{
+				struct tm timeinfo;
+				localtime_s(&timeinfo, &_time);
+
+				/**
+				*	log_backup-<month>.<day>.<year>-<hour>h<minute>m<second>s.txt
+				*	Ex: 2/27/2021 at 12:07:43
+				*	log_backup-2.27.2021-12h07m43s.txt
+				*/
+				logFileName = std::string("log_UTH-") +
+					std::to_string(timeinfo.tm_mon + 1) + '.' +
+					std::to_string(timeinfo.tm_mday) + '.' +
+					std::to_string(timeinfo.tm_year + 1900) + '-' +
+					std::to_string(timeinfo.tm_hour) + 'h' +
+					std::to_string(timeinfo.tm_min) + 'm' +
+					std::to_string(timeinfo.tm_sec) + 's' +
+					".txt";
+
+				logFile.open(logFileName, std::ios::out | std::ios::app);
+			}
+
+			/**
+			*	\brief Close the log file.
+			* 
+			*	Delete file if empty.
+			*/
+			void CloseLogFile()
+			{
+				logFile.close();
+
+				// Delete if empty file.
+				if(std::filesystem::is_empty(logFileName))
+					std::filesystem::remove(logFileName);
+			}
+
+
+			/**
+			*	\brief Log enabled and should log.
+			* 
+			*	\return log toggle.
+			*/
+			bool ShouldLog() noexcept
+			{
+				return bCslLog || bFileLog;
+			}
+
 
 			/**
 			*	\brief GroupBegin output in console.
 			*
 			*	\param[in] _name	The name of the group that begins.
 			*/
-			void GroupBeginCslLog(const std::string& _name)
+			void GroupBeginLog(const std::string& _name)
 			{
 				SetConsoleColor(CslColor::GroupBegin);
 				SA_UTH_LOG("[SA-UTH] Group:\t" << _name << '\n');
@@ -219,7 +301,7 @@ namespace Sa
 			*
 			*	\param[in] _group	The group that ends.
 			*/
-			void GroupEndCslLog(const class UTH::Group& _group)
+			void GroupEndLog(const class UTH::Group& _group)
 			{
 				SetConsoleColor(CslColor::GroupEnd);
 				std::cout << "[SA-UTH] Group:\t" << _group.name << " exit with code: ";
@@ -246,7 +328,7 @@ namespace Sa
 			*	\param[in] _funcDecl	Declaration of the function as a string.
 			*	\param[in] _lineNum		Line number of the function's call.
 			*/
-			void TitleCslLog(const std::string& _funcDecl, unsigned int _lineNum)
+			void TitleLog(const std::string& _funcDecl, unsigned int _lineNum)
 			{
 				SetConsoleColor(CslColor::Title);
 
@@ -261,7 +343,7 @@ namespace Sa
 			*
 			*	\param[in] _paramStrs	Every param infos extracted from call.
 			*/
-			void ParamsCslLog(const std::vector<Param>& _params)
+			void ParamsLog(const std::vector<Param>& _params)
 			{
 				for (auto it = _params.begin(); it != _params.end(); ++it)
 					SA_UTH_LOG(it->name << ":\n" << it->value << '\n');
@@ -273,7 +355,7 @@ namespace Sa
 			*
 			*	\param[_pred]	Result of the test.
 			*/
-			void ResultCslLog(bool _pred)
+			void ResultLog(bool _pred)
 			{
 				if (_pred)
 				{
@@ -309,13 +391,18 @@ namespace Sa
 		{
 			using namespace Internal;
 
+			time_t currTime = time(NULL);
+
+
+			OpenLogFile(currTime);
+
+
 			SetConsoleColor(CslColor::Init);
 			SA_UTH_LOG("[SA-UTH] Init:");
 
 			// Init rand.
-			time_t seed = time(NULL);
-			srand(seed);
-			SA_UTH_LOG("[SA-UTH] Rand seed: " << seed);
+			srand(currTime);
+			SA_UTH_LOG("[SA-UTH] Rand seed: " << currTime);
 			
 			SA_UTH_LOG('\n');
 			SetConsoleColor(CslColor::None);
@@ -355,6 +442,10 @@ namespace Sa
 			SA_UTH_LOG('\n');
 
 			SetConsoleColor(CslColor::None);
+			
+
+			CloseLogFile();
+
 
 			return exit;
 		}
@@ -414,8 +505,8 @@ namespace Sa
 			{
 				groups.push(Group{ _name });
 
-				if (bCslLog)
-					GroupBeginCslLog(_name);
+				if (ShouldLog())
+					GroupBeginLog(_name);
 
 				if (GroupBeginCB)
 					GroupBeginCB(_name);
@@ -427,8 +518,8 @@ namespace Sa
 				Group group = groups.top();
 				groups.pop();
 
-				if (bCslLog)
-					GroupEndCslLog(group);
+				if (ShouldLog())
+					GroupEndLog(group);
 
 				if (GroupEndCB)
 					GroupEndCB(group);
@@ -626,8 +717,8 @@ namespace Sa
 			/// Compute title from function declaration and line num.
 			void ComputeTitleStr(const std::string& _funcDecl, unsigned int _lineNum)
 			{
-				if (bCslLog)
-					TitleCslLog(_funcDecl, _lineNum);
+				if(ShouldLog())
+					TitleLog(_funcDecl, _lineNum);
 
 				if (TitleCB)
 					TitleCB(_funcDecl, _lineNum);
@@ -639,7 +730,7 @@ namespace Sa
 			void ComputeParamStr(bool _pred, std::string _paramNames, const Args&... _args)
 			{
 				// No need to compute params.
-				if (!bCslLog && !ParamsCB)
+				if (!ShouldLog() && !ParamsCB)
 					return;
 
 				if (_pred && (verbosity & ParamsSuccess) ||		// Should output params on success.
@@ -648,8 +739,7 @@ namespace Sa
 					std::vector<Param> params;
 					GenerateParamStr(params, _paramNames, _args...);
 
-					if (bCslLog)
-						ParamsCslLog(params);
+					ParamsLog(params);
 
 					if (ParamsCB)
 						ParamsCB(params);
@@ -677,8 +767,8 @@ namespace Sa
 				else
 					Sa::UTH::exit = EXIT_FAILURE;
 
-				if (bCslLog)
-					ResultCslLog(_pred);
+				if(ShouldLog())
+					ResultLog(_pred);
 
 				if (ResultCB)
 					ResultCB(_pred);

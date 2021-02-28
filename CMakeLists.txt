@@ -48,6 +48,14 @@ if(SA_UTH_DEFAULT_CSL_LOG)
 endif()
 
 
+# Default file log toggle value.
+option(SA_UTH_DEFAULT_FILE_LOG "Should Log tests in a file by default" ON)
+
+if(SA_UTH_DEFAULT_FILE_LOG)
+	target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_DEFAULT_FILE_LOG)
+endif()
+
+
 # Test exit on first failure.
 option(SA_UTH_EXIT_ON_FAILURE "Exit on first failure" OFF)
 
