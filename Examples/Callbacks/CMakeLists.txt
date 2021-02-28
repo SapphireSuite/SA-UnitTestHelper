@@ -1,16 +1,19 @@
 # Copyright (c) 2021 Sapphire Development Team. All Rights Reserved.
 
 
+
 # === Input ===
 
 # Add executable target built from sources.
 add_executable(UnitTestCallbacks main_callbacks.cpp)
 
 
+
 # === Dependencies ===
 
 # Add library dependencies.
 target_link_libraries(UnitTestCallbacks PRIVATE SA-UnitTestHelper)
+
 
 
 # === Testing ===

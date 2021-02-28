@@ -1,10 +1,16 @@
 # Copyright (c) 2021 Sapphire Development Team. All Rights Reserved.
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.17)
 
+
+
+# === Projects ===
 
 # Create CMake project.
 project(SA-UnitTestHelper)
+
+message("Main directory: ${CMAKE_SOURCE_DIR}")
+
 
 
 # === Input ===
@@ -16,10 +22,12 @@ add_library(SA-UnitTestHelper INTERFACE)
 target_include_directories(SA-UnitTestHelper INTERFACE .)
 
 
+
 # === Compile features ===
 
 # Standard
 target_compile_features(SA-UnitTestHelper INTERFACE cxx_std_17)
+
 
 
 # === Option ===
@@ -46,6 +54,7 @@ option(SA_UTH_EXIT_ON_FAILURE "Exit on first failure" OFF)
 if(SA_UTH_EXIT_ON_FAILURE)
 	target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_EXIT_ON_FAILURE)
 endif()
+
 
 
 # === Tests ===
