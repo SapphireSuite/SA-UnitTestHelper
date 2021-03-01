@@ -152,6 +152,8 @@ namespace Sa
 		{
 			std::fstream logFile;
 			std::string logFileName;
+
+			void LogGroupTabs() noexcept;
 		}
 
 		/// \endcond
@@ -164,8 +166,11 @@ namespace Sa
 		/// Quick log macro.
 		#define SA_UTH_LOG(_str)\
 		{\
+			using namespace Sa::UTH::Internal;\
+		\
+			LogGroupTabs();\
 			if (bCslLog) std::cout << _str << std::endl;\
-			if (bFileLog) Sa::UTH::Internal::logFile << _str << std::endl;\
+			if (bFileLog) logFile << _str << std::endl;\
 		}
 
 
@@ -316,6 +321,7 @@ namespace Sa
 			*/
 			void GroupEndLog(const class UTH::Group& _group)
 			{
+				LogGroupTabs();
 				SetConsoleColor(CslColor::GroupEnd);
 				std::cout << "[SA-UTH] Group:\t" << _group.name << " exit with code: ";
 
@@ -359,7 +365,10 @@ namespace Sa
 			void ParamsLog(const std::vector<Param>& _params)
 			{
 				for (auto it = _params.begin(); it != _params.end(); ++it)
-					SA_UTH_LOG(it->name << ":\n" << it->value << '\n');
+				{
+					SA_UTH_LOG(it->name << ':');
+					SA_UTH_LOG(it->value << '\n');
+				}
 			}
 
 
@@ -513,13 +522,20 @@ namespace Sa
 		{
 			std::stack<Group> groups;
 
+			void LogGroupTabs() noexcept
+			{
+				if(groups.size())
+					std::cout << std::string(groups.size(), '\t');
+			}
+
 			/// Start a new group of tests.
 			void GroupBegin(const std::string& _name)
 			{
-				groups.push(Group{ _name });
-
+				// Log before push for log indentation.
 				if ((verbosity & Verbosity::GroupStart) && ShouldLog())
 					GroupBeginLog(_name);
+
+				groups.push(Group{ _name });
 
 				if (GroupBeginCB)
 					GroupBeginCB(_name);
