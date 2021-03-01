@@ -577,6 +577,8 @@ namespace Sa
 		{
 			if constexpr (std::is_arithmetic<T>::value)
 				return std::to_string(_elem);
+			else if constexpr (std::is_pointer<T>::value)
+				return std::string("Addr: ") + std::to_string(reinterpret_cast<unsigned __int64>(_elem));
 			else
 				return _elem.ToString();
 		}
