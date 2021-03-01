@@ -999,6 +999,32 @@ namespace Sa
 			}\
 		}
 
+		/**
+		*	\brief Run a \e <b> Unit Test </b> using an operator with return value.
+		*
+		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
+		*
+		*	\param[in] _lhs		Left hand side operand to test.
+		*	\param[in] _op		Operator of the test between _lhs and _rhs.
+		*	\param[in] _rhs		Right hand side operand to test.
+		*	\param[in] _res		Value to compare with operator result.
+		*/
+		#define SA_UTH_ROP(_lhs, _op, _rhs, _res)\
+		{\
+			using namespace Sa::UTH::Internal;\
+		\
+			auto result = _lhs _op _rhs;\
+			bool bRes = result == _res;\
+			GroupUpdate(bRes);\
+		\
+			if(ShouldComputeTest(bRes))\
+			{\
+				ComputeTitleStr(#_lhs " " #_op " " #_rhs " == " #_res, __LINE__, bRes);\
+				ComputeParamStr(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, _lhs, _rhs, result, _res);\
+				ComputeResult(bRes);\
+			}\
+		}
+
 
 		/**
 		*	\brief Begin a group of test with name.
