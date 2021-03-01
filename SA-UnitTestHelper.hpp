@@ -166,6 +166,7 @@ namespace Sa
 		/// Quick log macro.
 		#define SA_UTH_LOG(_str)\
 		{\
+			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Internal;\
 		\
 			LogGroupTabs();\
@@ -833,7 +834,7 @@ namespace Sa
 		*	uint32 size:		Size lenght to compare _lhs and _rhs are T*
 		*	T epsilon			Epsilon value to allow threshold.
 		*/
-		#define SA_UTH_EQUALS(_lhs, _rhs, ...)\
+		#define SA_UTH_EQ(_lhs, _rhs, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -858,7 +859,7 @@ namespace Sa
 		*
 		*	\param[in] _func	Function to test with ... args.
 		*/
-		#define SA_UTH_SFUNC(_func, ...)\
+		#define SA_UTH_SF(_func, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -881,7 +882,7 @@ namespace Sa
 		*	\param[in] _func	Function to test with ... args.
 		*	\param[in] _res		Value to compare with _func result.
 		*/
-		#define SA_UTH_RSFUNC(_func, _res, ...)\
+		#define SA_UTH_RSF(_func, _res, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -906,7 +907,7 @@ namespace Sa
 		*	\param[in] _caller	caller of the functin _func.
 		*	\param[in] _func	Function to test with ... args.
 		*/
-		#define SA_UTH_MFUNC(_caller, _func, ...)\
+		#define SA_UTH_MF(_caller, _func, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -930,7 +931,7 @@ namespace Sa
 		*	\param[in] _func	Function to test with ... args.
 		*	\param[in] _res		Value to compare with _func result.
 		*/
-		#define SA_UTH_RMFUNC(_caller, _func, _res, ...)\
+		#define SA_UTH_RMF(_caller, _func, _res, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -972,23 +973,29 @@ namespace Sa
 		}
 
 
-		/// Begin a group of tests.
-		#define SA_UTH_GROUP_BEGIN(_name) Sa::UTH::Internal::GroupBegin(#_name);
+		/**
+		*	\brief Begin a group of test with name.
+		* 
+		*	\param[in] _name	Name of the group.
+		*/
+		#define SA_UTH_GPB(_name) Sa::UTH::Internal::GroupBegin(#_name);
 
-		/// End a group of tests.
-		#define SA_UTH_GROUP_END() Sa::UTH::Internal::GroupEnd();
+		/**
+		*	\brief End current group.
+		*/
+		#define SA_UTH_GPE() Sa::UTH::Internal::GroupEnd();
 
 
 		/**
 		*	\brief Run a group of tests from a single function.
 		*
-		*	\param[in] _func	The function which own the group of tests.
+		*	\param[in] _func	The function that own the group of tests.
 		*/
-		#define SA_UTH_GROUP(_func)\
+		#define SA_UTH_GP(_func)\
 		{\
-			SA_UTH_GROUP_BEGIN(_func)\
+			SA_UTH_GPB(_func)\
 			_func;\
-			SA_UTH_GROUP_END()\
+			SA_UTH_GPE()\
 		}
 
 #pragma endregion

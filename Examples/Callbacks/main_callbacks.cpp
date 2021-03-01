@@ -16,9 +16,9 @@ void GroupEndCB(const UTH::Group& _group)
 	SA_UTH_LOG("Group of test[" << _group.name << "] exit with code: " << _group.localExit << "\n");
 }
 
-void TitleCB(const std::string& _funcDecl, unsigned int _lineNum)
+void TitleCB(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
 {
-	SA_UTH_LOG("Test:\t" << _funcDecl << " at line:" << _lineNum << '\n');
+	SA_UTH_LOG("Test: " << _pred << "\t" << _funcDecl << " at line:" << _lineNum << '\n');
 }
 
 void ParamsCB(const std::vector<UTH::Param>& _params)
@@ -41,8 +41,8 @@ void MainTests()
 	int i = 5;
 	int j = 9;
 
-	SA_UTH_EQUALS(i, j);
-	SA_UTH_EQUALS(i, i);
+	SA_UTH_EQ(i, j);
+	SA_UTH_EQ(i, i);
 }
 
 int main()
@@ -64,7 +64,7 @@ int main()
 	UTH::ParamsCB = ParamsCB;
 	UTH::ResultCB = ResultCB;
 
-	SA_UTH_GROUP(MainTests());
+	SA_UTH_GP(MainTests());
 
 
 	SA_UTH_EXIT();

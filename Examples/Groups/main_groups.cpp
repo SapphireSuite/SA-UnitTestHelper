@@ -7,22 +7,22 @@ using namespace Sa;
 void GroupTests_Success()
 {
 	int i = 5;
-	SA_UTH_EQUALS(i, i);
+	SA_UTH_EQ(i, i);
 }
 
 void GroupTests_Failure()
 {
 	int i = 5;
 	int j = 9;
-	SA_UTH_EQUALS(i, j);
+	SA_UTH_EQ(i, j);
 
 
 	// Create subgroup manually with name "TestSubGroup".
-	SA_UTH_GROUP_BEGIN(TestSubGroup);
+	SA_UTH_GPB(TestSubGroup);
 
-	SA_UTH_EQUALS(i, i);
+	SA_UTH_EQ(i, i);
 
-	SA_UTH_GROUP_END();
+	SA_UTH_GPE();
 }
 
 int main()
@@ -30,8 +30,8 @@ int main()
 	SA_UTH_INIT();
 
 
-	SA_UTH_GROUP(GroupTests_Success());
-	SA_UTH_GROUP(GroupTests_Failure());
+	SA_UTH_GP(GroupTests_Success());
+	SA_UTH_GP(GroupTests_Failure());
 
 
 	SA_UTH_EXIT();
