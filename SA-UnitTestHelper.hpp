@@ -578,7 +578,7 @@ namespace Sa
 
 				// Spread local exit to parent.
 				if (!groups.empty())
-					GroupUpdate(groups.top().localExit);
+					GroupUpdate(groups.top().localExit == EXIT_SUCCESS);
 
 				if ((verbosity & Verbosity::GroupExit) && ShouldLog())
 					GroupEndLog(group);
