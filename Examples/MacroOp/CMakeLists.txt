@@ -5,11 +5,11 @@
 # === Input ===
 
 # Add executable target built from sources.
-add_executable(UTH_Groups main_groups.cpp)
+add_executable(UTH_MacroOp main_macro_op.cpp)
 
 
 
 # === Dependencies ===
 
 # Add library dependencies.
-target_link_libraries(UTH_Groups PRIVATE SA-UnitTestHelper)
+target_link_libraries(UTH_MacroOp PRIVATE SA-UnitTestHelper)

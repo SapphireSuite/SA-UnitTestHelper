@@ -12,10 +12,19 @@ struct Vec2
 	{
 		return x == _other.x && y == _other.y;
 	}
-	
 	static bool Equals(const Vec2& _lhs, const Vec2& _rhs)
 	{
 		return _lhs.x == _rhs.x && _lhs.y == _rhs.y;
+	}
+
+	Vec2 Add(const Vec2& _other) const
+	{
+		return Vec2{ x + _other.x, y + _other.y };
+	}
+
+	Vec2 operator+(const Vec2& _other) const
+	{
+		return Add(_other);
 	}
 
 	bool operator==(const Vec2& _rhs) const noexcept
@@ -35,20 +44,30 @@ std::string UTH::ToString<Vec2>(const Vec2& _elem)
 	return res;
 }
 
-bool TestMethod(int _i, float _j)
+bool GlobalValidate(bool _pred)
 {
-	return true;
+	return _pred;
+}
+
+int GlobalAdd(int _i, int _j)
+{
+	return _i + _j;
 }
 
 
 /// Methods with all the tests (can be in a separated file).
 void MainTests()
 {
+	// No output on success.
+	UTH::verbosity = UTH::None;
+
+	SA_UTH_SF(GlobalValidate, true);
+
+
 	// Print tests on success.
 	UTH::verbosity = UTH::Success;
 
-
-	SA_UTH_SF(TestMethod, 8, 3.45f);
+	SA_UTH_RSF(GlobalAdd, 12, 8, 4);
 
 
 	// Output param's value.
@@ -57,40 +76,34 @@ void MainTests()
 
 	// Single method test.
 	int i = 4;
-	float j = 12.11f;
-	SA_UTH_SF(TestMethod, i, j);
+	int j = 6;
+	int expected_res = 10;
+	SA_UTH_RSF(GlobalAdd, expected_res, i, j);
 
 
-	// Output params' value and name.
+	// Output param's name.
 	UTH::verbosity |= UTH::ParamsName;
+
+	SA_UTH_RSF(GlobalAdd, expected_res, i, j);
+
+
+	// Reset to Default.
+	UTH::verbosity = UTH::Default;
+
 
 
 	// Vec2 Tests.
 	Vec2 v1{ 1.0f, 2.0f };
 	Vec2 v2{ 1.0f, 2.0f };
+	Vec2 v1v2{ 2.0f, 4.0f };
 
+	SA_UTH_EQ(v1, v2);
 	SA_UTH_MF(v1, IsEqual, v2);
 	SA_UTH_SF(Vec2::Equals, v1, v2);
 	SA_UTH_OP(v1, ==, v2);
 
-
-	// Equals tests.
-	// Single elem.
-	float f = 45.3654f;
-
-	SA_UTH_EQ(f, f);
-	SA_UTH_EQ(f, f, FLT_EPSILON);
-
-	SA_UTH_EQ(v1, v2);
-
-
-	// Tab.
-	float ftab1[] = { 45.3654f, 983.64f, 1.254f, 4.25f };
-	float ftab2[] = { 45.3654f, 983.64f, 1.254f, 7983.7f };
-	SA_UTH_EQ(ftab1, ftab1, 4u);
-	SA_UTH_EQ(ftab1, ftab1, 4u, FLT_EPSILON);
-
-	SA_UTH_EQ(ftab1, ftab2, 3u);
+	SA_UTH_RMF(v1, Add, v1v2, v2);
+	SA_UTH_ROP(v1, +, v2, v1v2);
 }
 
 int main()

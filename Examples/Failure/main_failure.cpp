@@ -20,6 +20,17 @@ struct Vec2
 		return _lhs.x == _rhs.y && _lhs.y == _rhs.x;
 	}
 
+	Vec2 Add(const Vec2& _other) const
+	{
+		// ERROR.
+		return Vec2{ x + _other.x, y + _other.x };
+	}
+
+	Vec2 operator+(const Vec2& _other) const
+	{
+		return Add(_other);
+	}
+
 	bool operator==(const Vec2& _rhs) const noexcept
 	{
 		return IsEqual(_rhs);
@@ -37,63 +48,69 @@ std::string UTH::ToString<Vec2>(const Vec2& _elem)
 	return res;
 }
 
-bool TestMethod(int _i, float _j)
+bool GlobalValidate(bool _pred)
 {
-	return false;
+	return _pred;
+}
+
+int GlobalAdd(int _i, int _j)
+{
+	// ERROR.
+	return _i + _i;
 }
 
 
 /// Methods with all the tests (can be in a separated file).
 void MainTests()
 {
-	// No verbosity.
+	// No output on success.
 	UTH::verbosity = UTH::None;
 
+	SA_UTH_SF(GlobalValidate, true);
+	SA_UTH_SF(GlobalValidate, false); // ERROR.
 
-	SA_UTH_SF(TestMethod, 8, 3.45f);
+
+	// Print tests on success.
+	UTH::verbosity = UTH::Success;
+
+	SA_UTH_RSF(GlobalAdd, 16, 8, 8);
+	SA_UTH_RSF(GlobalAdd, 12, 8, 4); // ERROR
 
 
 	// Output param's value.
-	UTH::verbosity = UTH::ParamsFailure;
+	UTH::verbosity |= UTH::ParamsFailure;
 
 
 	// Single method test.
 	int i = 4;
-	float j = 12.11f;
-	SA_UTH_SF(TestMethod, i, j);
+	int j = 6;
+	int expected_res = 10;
+	SA_UTH_RSF(GlobalAdd, expected_res, i, j);
 
 
-	// Output params' value and name.
+	// Output param's name.
 	UTH::verbosity |= UTH::ParamsName;
+
+	SA_UTH_RSF(GlobalAdd, expected_res, i, j);
+
+
+	// Reset to Default.
+	UTH::verbosity = UTH::Default;
+
 
 
 	// Vec2 Tests.
 	Vec2 v1{ 1.0f, 2.0f };
 	Vec2 v2{ 1.0f, 2.0f };
-
-	SA_UTH_MF(v1, IsEqual, v2);
-	SA_UTH_SF(Vec2::Equals, v1, v2);
-	SA_UTH_OP(v1, ==, v2);
-
-
-	// Equals tests.
-	// Single elem.
-	float f1 = 45.3654f;
-	float f2 = 3.4f;
-	SA_UTH_EQ(f1, f2);
-	SA_UTH_EQ(f1, f2, FLT_EPSILON);
+	Vec2 v1v2{ 2.0f, 4.0f };
 
 	SA_UTH_EQ(v1, v2);
+	SA_UTH_MF(v1, IsEqual, v2);
+	SA_UTH_SF(Vec2::Equals, v1, v2);
+	SA_UTH_OP(v1, == , v2);
 
-
-	// Tab.
-	float ftab1[] = { 45.3654f, 983.64f, 1.254f, 4.25f };
-	float ftab2[] = { 4.15f, 983.64f, 1.254f, 4.25f };
-
-	SA_UTH_EQ(ftab1, ftab2, 4u);
-	SA_UTH_EQ(ftab1, ftab2, 4u, FLT_EPSILON);
-
-	SA_UTH_EQ(ftab1, ftab2, 3u);
+	SA_UTH_RMF(v1, Add, v1v2, v2);
+	SA_UTH_ROP(v1, +, v2, v1v2);
 }
 
 int main()

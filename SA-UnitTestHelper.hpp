@@ -366,6 +366,7 @@ namespace Sa
 				SetConsoleColor(CslColor::None);
 			}
 
+
 			/**
 			*	\brief Test title output in console.
 			*
@@ -399,7 +400,6 @@ namespace Sa
 				SetConsoleColor(CslColor::None);
 			}
 
-
 			/**
 			*	\brief Test parameters output in console.
 			*
@@ -409,7 +409,9 @@ namespace Sa
 			{
 				for (auto it = _params.begin(); it != _params.end(); ++it)
 				{
-					SA_UTH_LOG(it->name << ':');
+					if(verbosity & Verbosity::ParamsName)
+						SA_UTH_LOG(it->name << ':');
+
 					SA_UTH_LOG(it->value);
 				}
 			}
@@ -437,11 +439,10 @@ namespace Sa
 
 
 			SetConsoleColor(CslColor::Init);
-			SA_UTH_LOG("[SA-UTH] Init:");
 
 			// Init rand.
 			srand(currTime);
-			SA_UTH_LOG("\t[SA-UTH] Rand seed: " << currTime);
+			SA_UTH_LOG("[SA-UTH] Init Rand seed: " << currTime);
 			
 			SetConsoleColor(CslColor::None);
 		}

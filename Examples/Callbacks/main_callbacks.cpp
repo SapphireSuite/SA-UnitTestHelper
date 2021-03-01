@@ -10,12 +10,12 @@ void GroupBeginCB(const std::string& _name)
 	// Get UserData.
 	int& myUserData = UTH::GetUserData<int>();
 
-	LOG("Group of test[" << _name << "] started\n");
+	LOG("Group of test [" << _name << "] started\n");
 }
 
 void GroupEndCB(const UTH::Group& _group)
 {
-	LOG("Group of test[" << _group.name << "] exit with code: " << _group.localExit << "\n");
+	LOG("Group of test [" << _group.name << "] exit with code: " << _group.localExit);
 }
 
 void TitleCB(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
@@ -43,8 +43,8 @@ void MainTests()
 	int i = 5;
 	int j = 9;
 
-	SA_UTH_EQ(i, j);
 	SA_UTH_EQ(i, i);
+	SA_UTH_EQ(i, j); // Error.
 }
 
 int main()

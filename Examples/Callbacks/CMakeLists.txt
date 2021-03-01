@@ -5,18 +5,11 @@
 # === Input ===
 
 # Add executable target built from sources.
-add_executable(UnitTestCallbacks main_callbacks.cpp)
+add_executable(UTH_Callbacks main_callbacks.cpp)
 
 
 
 # === Dependencies ===
 
 # Add library dependencies.
-target_link_libraries(UnitTestCallbacks PRIVATE SA-UnitTestHelper)
-
-
-
-# === Testing ===
-
-# Create CTest that run UnitTestCallbacks exe.
-add_test(NAME CUnitTestCallbacks COMMAND UnitTestCallbacks --config $<CONFIGURATION> --exe $<TARGET_FILE:UnitTestCallbacks>)
+target_link_libraries(UTH_Callbacks PRIVATE SA-UnitTestHelper)

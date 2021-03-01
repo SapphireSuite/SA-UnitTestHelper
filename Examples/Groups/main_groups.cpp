@@ -14,7 +14,7 @@ void GroupTests_Failure()
 {
 	int i = 5;
 	int j = 9;
-	SA_UTH_EQ(i, j);
+	SA_UTH_EQ(i, j); // Error.
 
 
 	// Create subgroup manually with name "TestSubGroup".

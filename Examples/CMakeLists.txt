@@ -13,7 +13,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Bin/UTH_Examples)		# .exe
 
 # === EntryPoints ===
 
+add_subdirectory(MacroEquals)
+add_subdirectory(MacroSFunc)
+add_subdirectory(MacroMFunc)
+add_subdirectory(MacroOp)
+add_subdirectory(Groups)
+add_subdirectory(Callbacks)
 add_subdirectory(Success)
 add_subdirectory(Failure)
-add_subdirectory(Callbacks)
-add_subdirectory(Groups)
