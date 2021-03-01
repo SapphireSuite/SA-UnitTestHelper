@@ -70,12 +70,25 @@ namespace Sa
 			/// Output params' value on success.
 			ParamsSuccess = 1 << 3,
 
+			/// Output group start.
+			GroupStart = 1 << 4,
+
+			/// Output group exit result.
+			GroupExit = 1 << 5,
+
+
+			/// Light verbosity value.
+			Light = ParamsName | ParamsFailure | GroupExit,
+
+			/// Default verbosity value.
+			Default = Success | ParamsName | ParamsFailure | GroupStart | GroupExit,
+
 			/// Maximum verbosity level (all flags set).
 			Max = 0xFF
 		};
 
 		/// Current verbosity level.
-		unsigned int verbosity = Success | ParamsName | ParamsFailure;
+		unsigned int verbosity = Default;
 
 #pragma endregion
 
@@ -505,7 +518,7 @@ namespace Sa
 			{
 				groups.push(Group{ _name });
 
-				if (ShouldLog())
+				if ((verbosity & Verbosity::GroupStart) && ShouldLog())
 					GroupBeginLog(_name);
 
 				if (GroupBeginCB)
@@ -532,7 +545,7 @@ namespace Sa
 				if (!groups.empty())
 					GroupUpdate(groups.top().localExit);
 
-				if (ShouldLog())
+				if ((verbosity & Verbosity::GroupExit) && ShouldLog())
 					GroupEndLog(group);
 
 				if (GroupEndCB)
