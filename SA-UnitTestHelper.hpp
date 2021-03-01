@@ -873,6 +873,30 @@ namespace Sa
 			}\
 		}
 
+		/**
+		*	\brief Run a \e <b> Unit Test </b> using a static function with return value.
+		*
+		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
+		*
+		*	\param[in] _func	Function to test with ... args.
+		*	\param[in] _res		Value to compare with _func result.
+		*/
+		#define SA_UTH_RSFUNC(_func, _res, ...)\
+		{\
+			using namespace Sa::UTH::Internal;\
+		\
+			auto result = _func(__VA_ARGS__);\
+			bool bRes = result == _res;\
+			GroupUpdate(bRes);\
+		\
+			if(ShouldComputeTest(bRes))\
+			{\
+				ComputeTitleStr(#_func "(" #__VA_ARGS__ ") == " #_res, __LINE__, bRes);\
+				ComputeParamStr(bRes, #__VA_ARGS__ ", " #_func "(), " #_res, __VA_ARGS__, result, _res);\
+				ComputeResult(bRes);\
+			}\
+		}
+
 
 		/**
 		*	\brief Run a \e <b> Unit Test </b> using a member function.
@@ -893,6 +917,31 @@ namespace Sa
 			{\
 				ComputeTitleStr(#_caller "." #_func "(" #__VA_ARGS__ ")", __LINE__, bRes);\
 				ComputeParamStr(bRes, #_caller ", " #__VA_ARGS__, _caller, __VA_ARGS__);\
+				ComputeResult(bRes);\
+			}\
+		}
+
+		/**
+		*	\brief Run a \e <b> Unit Test </b> using a member function with return value.
+		*
+		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
+		*
+		*	\param[in] _caller	caller of the functin _func.
+		*	\param[in] _func	Function to test with ... args.
+		*	\param[in] _res		Value to compare with _func result.
+		*/
+		#define SA_UTH_RMFUNC(_caller, _func, _res, ...)\
+		{\
+			using namespace Sa::UTH::Internal;\
+		\
+			auto result = _caller._func(__VA_ARGS__);\
+			bool bRes = result == _res;\
+			GroupUpdate(bRes);\
+		\
+			if(ShouldComputeTest(bRes))\
+			{\
+				ComputeTitleStr(#_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __LINE__, bRes);\
+				ComputeParamStr(bRes, #_caller ", " #__VA_ARGS__ ", " #_caller "." #_func "(), " #_res, _caller, __VA_ARGS__, result, _res);\
 				ComputeResult(bRes);\
 			}\
 		}
