@@ -39,16 +39,16 @@ int main()
 	int j = 1;
 
 	/// func_name, result, args1, args2...
-	SA_UTH_RSF(GlobalAdd, 5, i, j);
-	SA_UTH_RSF(GlobalAdd, 8, i, j); // Error.
+	SA_UTH_RSF(5, GlobalAdd, i, j);
+	SA_UTH_RSF(8, GlobalAdd, i, j); // Error.
 
 
 	// Custom elem.
 	MyClass m1{ 4.56f };
 	MyClass m2{ 8.15f };
 
-	SA_UTH_RSF(MyClass::Equals, false, m1, m2);
-	SA_UTH_RSF(MyClass::Equals, true, m1, m2); // Error.
+	SA_UTH_RSF(false, MyClass::Equals, m1, m2);
+	SA_UTH_RSF(true, MyClass::Equals, m1, m2); // Error.
 
 
 	SA_UTH_EXIT();

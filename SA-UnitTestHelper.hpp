@@ -907,10 +907,10 @@ namespace Sa
 		*
 		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
 		*
-		*	\param[in] _func	Function to test with ... args.
 		*	\param[in] _res		Value to compare with _func result.
+		*	\param[in] _func	Function to test with ... args.
 		*/
-		#define SA_UTH_RSF(_func, _res, ...)\
+		#define SA_UTH_RSF(_res, _func, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -955,11 +955,11 @@ namespace Sa
 		*
 		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
 		*
+		*	\param[in] _res		Value to compare with _func result.
 		*	\param[in] _caller	caller of the functin _func.
 		*	\param[in] _func	Function to test with ... args.
-		*	\param[in] _res		Value to compare with _func result.
 		*/
-		#define SA_UTH_RMF(_caller, _func, _res, ...)\
+		#define SA_UTH_RMF(_res, _caller, _func, ...)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
@@ -1005,12 +1005,12 @@ namespace Sa
 		*
 		*	UTH::exit will be equal to EXIT_FAILURE (1) if at least one test failed.
 		*
+		*	\param[in] _res		Value to compare with operator result.
 		*	\param[in] _lhs		Left hand side operand to test.
 		*	\param[in] _op		Operator of the test between _lhs and _rhs.
 		*	\param[in] _rhs		Right hand side operand to test.
-		*	\param[in] _res		Value to compare with operator result.
 		*/
-		#define SA_UTH_ROP(_lhs, _op, _rhs, _res)\
+		#define SA_UTH_ROP(_res, _lhs, _op, _rhs)\
 		{\
 			using namespace Sa::UTH::Internal;\
 		\

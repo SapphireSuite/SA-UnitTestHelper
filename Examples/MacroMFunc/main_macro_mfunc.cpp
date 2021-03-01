@@ -39,8 +39,8 @@ int main()
 	int failureRes = 5;
 
 	/// caller, func_name, result, args1, args2...
-	SA_UTH_RMF(m1, Add, successRes, m2);
-	SA_UTH_RMF(m1, Add, failureRes, m2); // Error.
+	SA_UTH_RMF(successRes, m1, Add, m2);
+	SA_UTH_RMF(failureRes, m1, Add, m2); // Error.
 
 
 	SA_UTH_EXIT();

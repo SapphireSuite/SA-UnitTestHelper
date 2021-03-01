@@ -32,8 +32,8 @@ int main()
 	int failureRes = 5;
 
 	/// lhs, operator, rhs, result
-	SA_UTH_ROP(m1, +, m2, successRes);
-	SA_UTH_ROP(m1, +, m2, failureRes); // Error.
+	SA_UTH_ROP(successRes, m1, +, m2);
+	SA_UTH_ROP(failureRes, m1, +, m2); // Error.
 
 
 	SA_UTH_EXIT();

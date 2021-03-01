@@ -67,7 +67,7 @@ void MainTests()
 	// Print tests on success.
 	UTH::verbosity = UTH::Success;
 
-	SA_UTH_RSF(GlobalAdd, 12, 8, 4);
+	SA_UTH_RSF(12, GlobalAdd, 8, 4);
 
 
 	// Output param's value.
@@ -78,13 +78,13 @@ void MainTests()
 	int i = 4;
 	int j = 6;
 	int expected_res = 10;
-	SA_UTH_RSF(GlobalAdd, expected_res, i, j);
+	SA_UTH_RSF(expected_res, GlobalAdd, i, j);
 
 
 	// Output param's name.
 	UTH::verbosity |= UTH::ParamsName;
 
-	SA_UTH_RSF(GlobalAdd, expected_res, i, j);
+	SA_UTH_RSF(expected_res, GlobalAdd, i, j);
 
 
 	// Reset to Default.
@@ -102,8 +102,8 @@ void MainTests()
 	SA_UTH_SF(Vec2::Equals, v1, v2);
 	SA_UTH_OP(v1, ==, v2);
 
-	SA_UTH_RMF(v1, Add, v1v2, v2);
-	SA_UTH_ROP(v1, +, v2, v1v2);
+	SA_UTH_RMF(v1v2, v1, Add, v2);
+	SA_UTH_ROP(v1v2, v1, +, v2);
 }
 
 int main()
