@@ -310,7 +310,7 @@ namespace Sa
 			void GroupBeginLog(const std::string& _name)
 			{
 				SetConsoleColor(CslColor::GroupBegin);
-				SA_UTH_LOG("[SA-UTH] Group:\t" << _name << '\n');
+				SA_UTH_LOG("[SA-UTH] Group:\t" << _name);
 				SetConsoleColor(CslColor::None);
 			}
 
@@ -336,8 +336,7 @@ namespace Sa
 					std::cout << "EXIT_FAILURE (" << EXIT_FAILURE << ')';
 				}
 
-				SetConsoleColor(CslColor::GroupEnd);
-				SA_UTH_LOG("\n\n");
+				std::cout << std::endl;
 				SetConsoleColor(CslColor::None);
 			}
 
@@ -346,12 +345,30 @@ namespace Sa
 			*
 			*	\param[in] _funcDecl	Declaration of the function as a string.
 			*	\param[in] _lineNum		Line number of the function's call.
+			*	\param[_pred]			Result of the test.
 			*/
-			void TitleLog(const std::string& _funcDecl, unsigned int _lineNum)
+			void TitleLog(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
 			{
 				SetConsoleColor(CslColor::Title);
 
-				SA_UTH_LOG("[SA-UTH] Test:\t" << _funcDecl << " -- l:" << _lineNum << '\n');
+				LogGroupTabs();
+				std::cout << "[SA-UTH] ";
+				
+				// Result.
+				if (_pred)
+				{
+					SetConsoleColor(CslColor::Success);
+					std::cout << "Success ";
+				}
+				else
+				{
+					SetConsoleColor(CslColor::Failure);
+					std::cout << "Failure ";
+				}
+
+				SetConsoleColor(CslColor::Title);
+
+				std::cout << _funcDecl << " -- l:" << _lineNum << std::endl;
 
 				SetConsoleColor(CslColor::None);
 			}
@@ -367,33 +384,7 @@ namespace Sa
 				for (auto it = _params.begin(); it != _params.end(); ++it)
 				{
 					SA_UTH_LOG(it->name << ':');
-					SA_UTH_LOG(it->value << '\n');
-				}
-			}
-
-
-			/**
-			*	\brief Test result output in console.
-			*
-			*	\param[_pred]	Result of the test.
-			*/
-			void ResultLog(bool _pred)
-			{
-				if (_pred)
-				{
-					SetConsoleColor(CslColor::Success);
-
-					SA_UTH_LOG("Success\n\n");
-
-					SetConsoleColor(CslColor::None);
-				}
-				else
-				{
-					SetConsoleColor(CslColor::Failure);
-
-					SA_UTH_LOG("Failure\n\n");
-
-					SetConsoleColor(CslColor::None);
+					SA_UTH_LOG(it->value);
 				}
 			}
 		}
@@ -502,13 +493,13 @@ namespace Sa
 		/// Callback called on groupe end.
 		void (*GroupEndCB)(const Group& _group) = nullptr;
 		
-		/// Callback called on test's title output.
-		void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum) = nullptr;
+		/// Callback called on test's title processing.
+		void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum, bool _pred) = nullptr;
 		
-		/// Callback called on test's parameters output.
+		/// Callback called on test's parameters processing.
 		void (*ParamsCB)(const std::vector<Param>& _params) = nullptr;
 		
-		/// Callback called on test's result output.
+		/// Callback called on test's result processing.
 		void (*ResultCB)(bool _pred) = nullptr;
 
 #pragma endregion
@@ -750,13 +741,13 @@ namespace Sa
 		namespace Internal
 		{
 			/// Compute title from function declaration and line num.
-			void ComputeTitleStr(const std::string& _funcDecl, unsigned int _lineNum)
+			void ComputeTitleStr(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
 			{
 				if(ShouldLog())
-					TitleLog(_funcDecl, _lineNum);
+					TitleLog(_funcDecl, _lineNum, _pred);
 
 				if (TitleCB)
-					TitleCB(_funcDecl, _lineNum);
+					TitleCB(_funcDecl, _lineNum, _pred);
 			}
 
 
@@ -799,9 +790,6 @@ namespace Sa
 			{
 				if (!_pred)
 					Sa::UTH::exit = EXIT_FAILURE;
-
-				if(ShouldLog())
-					ResultLog(_pred);
 
 				if (ResultCB)
 					ResultCB(_pred);
@@ -856,7 +844,7 @@ namespace Sa
 			{\
 				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + (SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
 			\
-				ComputeTitleStr(titleStr, __LINE__);\
+				ComputeTitleStr(titleStr, __LINE__, bRes);\
 				ComputeParamStr(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -879,7 +867,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitleStr(#_func "(" #__VA_ARGS__ ")", __LINE__);\
+				ComputeTitleStr(#_func "(" #__VA_ARGS__ ")", __LINE__, bRes);\
 				ComputeParamStr(bRes, #__VA_ARGS__, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -903,7 +891,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitleStr(#_caller "." #_func "(" #__VA_ARGS__ ")", __LINE__);\
+				ComputeTitleStr(#_caller "." #_func "(" #__VA_ARGS__ ")", __LINE__, bRes);\
 				ComputeParamStr(bRes, #_caller ", " #__VA_ARGS__, _caller, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -928,7 +916,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitleStr(#_lhs " " #_op " " #_rhs, __LINE__);\
+				ComputeTitleStr(#_lhs " " #_op " " #_rhs, __LINE__, bRes);\
 				ComputeParamStr(bRes, #_lhs ", " #_rhs, _lhs, _rhs);\
 				ComputeResult(bRes);\
 			}\
