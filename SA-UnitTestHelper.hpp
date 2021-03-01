@@ -512,21 +512,6 @@ namespace Sa
 					GroupBeginCB(_name);
 			}
 
-			/// End a group of tests.
-			Group GroupEnd()
-			{
-				Group group = groups.top();
-				groups.pop();
-
-				if (ShouldLog())
-					GroupEndLog(group);
-
-				if (GroupEndCB)
-					GroupEndCB(group);
-
-				return group;
-			}
-
 			/// Update current group from test result.
 			void GroupUpdate(bool _pred)
 			{
@@ -535,6 +520,25 @@ namespace Sa
 					if (!_pred)
 						groups.top().localExit = EXIT_FAILURE;
 				}
+			}
+
+			/// End a group of tests.
+			Group GroupEnd()
+			{
+				Group group = groups.top();
+				groups.pop();
+
+				// Spread local exit to parent.
+				if (!groups.empty())
+					GroupUpdate(groups.top().localExit);
+
+				if (ShouldLog())
+					GroupEndLog(group);
+
+				if (GroupEndCB)
+					GroupEndCB(group);
+
+				return group;
 			}
 		}
 
@@ -708,7 +712,7 @@ namespace Sa
 #pragma endregion
 
 
-#pragma region ComputeStr
+#pragma region Compute
 
 		/// \cond Internal
 
@@ -762,9 +766,7 @@ namespace Sa
 			/// Compute the result using _pred predicate.
 			void ComputeResult(bool _pred)
 			{
-				if (_pred)
-					Sa::UTH::exit = EXIT_SUCCESS;
-				else
+				if (!_pred)
 					Sa::UTH::exit = EXIT_FAILURE;
 
 				if(ShouldLog())
