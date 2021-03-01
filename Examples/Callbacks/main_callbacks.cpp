@@ -3,36 +3,38 @@
 #include <SA-UnitTestHelper.hpp>
 using namespace Sa;
 
+#define LOG(_str) std::cout << _str << std::endl;
+
 void GroupBeginCB(const std::string& _name)
 {
 	// Get UserData.
 	int& myUserData = UTH::GetUserData<int>();
 
-	SA_UTH_LOG("Group of test[" << _name << "] started\n");
+	LOG("Group of test[" << _name << "] started\n");
 }
 
 void GroupEndCB(const UTH::Group& _group)
 {
-	SA_UTH_LOG("Group of test[" << _group.name << "] exit with code: " << _group.localExit << "\n");
+	LOG("Group of test[" << _group.name << "] exit with code: " << _group.localExit << "\n");
 }
 
 void TitleCB(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
 {
-	SA_UTH_LOG("Test: " << _pred << "\t" << _funcDecl << " at line:" << _lineNum << '\n');
+	LOG("Test: " << _pred << "\t" << _funcDecl << " at line:" << _lineNum << '\n');
 }
 
 void ParamsCB(const std::vector<UTH::Param>& _params)
 {
 	for (auto it = _params.begin(); it != _params.end(); ++it)
-		SA_UTH_LOG(it->name << ": [" << it->value << "]\n");
+		LOG(it->name << ": [" << it->value << "]\n");
 }
 
 void ResultCB(bool _predicate)
 {
 	if (_predicate)
-		SA_UTH_LOG("Result: Success\n")
+		LOG("Result: Success\n")
 	else
-		SA_UTH_LOG("Result: Failure\n")
+		LOG("Result: Failure\n")
 }
 
 /// Methods with all the tests (can be in a separated file).

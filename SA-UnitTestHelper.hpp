@@ -163,7 +163,11 @@ namespace Sa
 
 #pragma region Log
 
-		/// Quick log macro.
+		/**
+		*	\brief UTH log macro
+		*
+		*	Output with indentation and options bCslLog and bFileLog.
+		*/
 		#define SA_UTH_LOG(_str)\
 		{\
 			using namespace Sa::UTH;\
@@ -172,6 +176,26 @@ namespace Sa
 			LogGroupTabs();\
 			if (bCslLog) std::cout << _str << std::endl;\
 			if (bFileLog) logFile << _str << std::endl;\
+		}
+
+		/// Output only str as input.
+		#define __SA_UTH_LOG_IN(_str)\
+		{\
+			using namespace Sa::UTH;\
+			using namespace Sa::UTH::Internal;\
+		\
+			if (bCslLog) std::cout << _str;\
+			if (bFileLog) logFile << _str;\
+		}
+
+		/// Ouput only end of line.
+		#define __SA_UTH_LOG_ENDL()\
+		{\
+			using namespace Sa::UTH;\
+			using namespace Sa::UTH::Internal;\
+		\
+			if (bCslLog) std::cout << std::endl;\
+			if (bFileLog) logFile << std::endl;\
 		}
 
 
@@ -324,20 +348,21 @@ namespace Sa
 			{
 				LogGroupTabs();
 				SetConsoleColor(CslColor::GroupEnd);
-				std::cout << "[SA-UTH] Group:\t" << _group.name << " exit with code: ";
+
+				__SA_UTH_LOG_IN("[SA-UTH] Group:\t" << _group.name << " exit with code: ");
 
 				if (_group.localExit == EXIT_SUCCESS)
 				{
 					SetConsoleColor(CslColor::Success);
-					std::cout << "EXIT_SUCCESS (" << EXIT_SUCCESS << ')';
+					__SA_UTH_LOG_IN("EXIT_SUCCESS (" << EXIT_SUCCESS << ')');
 				}
 				else
 				{
 					SetConsoleColor(CslColor::Failure);
-					std::cout << "EXIT_FAILURE (" << EXIT_FAILURE << ')';
+					__SA_UTH_LOG_IN("EXIT_FAILURE (" << EXIT_FAILURE << ')');
 				}
 
-				std::cout << std::endl;
+				__SA_UTH_LOG_ENDL();
 				SetConsoleColor(CslColor::None);
 			}
 
@@ -353,23 +378,23 @@ namespace Sa
 				SetConsoleColor(CslColor::Title);
 
 				LogGroupTabs();
-				std::cout << "[SA-UTH] ";
-				
+				__SA_UTH_LOG_IN("[SA-UTH] ");
+
 				// Result.
 				if (_pred)
 				{
 					SetConsoleColor(CslColor::Success);
-					std::cout << "Success ";
+					__SA_UTH_LOG_IN("Success ");
 				}
 				else
 				{
 					SetConsoleColor(CslColor::Failure);
-					std::cout << "Failure ";
+					__SA_UTH_LOG_IN("Failure ");
 				}
 
 				SetConsoleColor(CslColor::Title);
 
-				std::cout << _funcDecl << " -- l:" << _lineNum << std::endl;
+				__SA_UTH_LOG_IN(_funcDecl << " -- l:" << _lineNum << std::endl);
 
 				SetConsoleColor(CslColor::None);
 			}
@@ -416,9 +441,8 @@ namespace Sa
 
 			// Init rand.
 			srand(currTime);
-			SA_UTH_LOG("[SA-UTH] Rand seed: " << currTime);
+			SA_UTH_LOG("\t[SA-UTH] Rand seed: " << currTime);
 			
-			SA_UTH_LOG('\n');
 			SetConsoleColor(CslColor::None);
 		}
 
@@ -439,22 +463,25 @@ namespace Sa
 		{
 			using namespace Internal;
 
+			// Reset to default.
+			bCslLog = SA_UTH_DEFAULT_CSL_LOG;
+			bFileLog = SA_UTH_DEFAULT_FILE_LOG;
+
 			SetConsoleColor(CslColor::Exit);
-			std::cout << "[SA-UTH] Exit with code: ";
+			__SA_UTH_LOG_IN("[SA-UTH] Exit with code: ");
 
 			if (exit == EXIT_SUCCESS)
 			{
 				SetConsoleColor(CslColor::Success);
-				std::cout << "EXIT_SUCCESS (" << EXIT_SUCCESS << ')';
+				__SA_UTH_LOG_IN("EXIT_SUCCESS (" << EXIT_SUCCESS << ')');
 			}
 			else
 			{
 				SetConsoleColor(CslColor::Failure);
-				std::cout << "EXIT_FAILURE (" << EXIT_FAILURE << ')';
+				__SA_UTH_LOG_IN("EXIT_FAILURE (" << EXIT_FAILURE << ')');
 			}
 
-			SA_UTH_LOG('\n');
-
+			__SA_UTH_LOG_ENDL();
 			SetConsoleColor(CslColor::None);
 			
 
@@ -517,7 +544,7 @@ namespace Sa
 			void LogGroupTabs() noexcept
 			{
 				if(groups.size())
-					std::cout << std::string(groups.size(), '\t');
+					__SA_UTH_LOG_IN(std::string(groups.size(), '\t'));
 			}
 
 			/// Start a new group of tests.
