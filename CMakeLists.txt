@@ -28,6 +28,8 @@ target_include_directories(SA-UnitTestHelper INTERFACE .)
 # Standard
 target_compile_features(SA-UnitTestHelper INTERFACE cxx_std_17)
 
+# UTH module implementation preprocessor.
+target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_IMPL)
 
 
 # === Option ===
