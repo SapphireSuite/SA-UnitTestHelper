@@ -812,7 +812,7 @@ namespace Sa
 			
 
 			/// Compute title from function declaration and line num.
-			void ComputeTitleStr(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
+			void ComputeTitle(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
 			{
 				if(ShouldLog())
 					TitleLog(_funcDecl, _lineNum, _pred);
@@ -824,7 +824,7 @@ namespace Sa
 
 			/// Compute params.
 			template <typename... Args>
-			void ComputeParamStr(bool _pred, std::string _paramNames, const Args&... _args)
+			void ComputeParam(bool _pred, std::string _paramNames, const Args&... _args)
 			{
 				// No need to compute params.
 				if (!ShouldLog() && !ParamsCB)
@@ -915,8 +915,8 @@ namespace Sa
 			{\
 				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + (SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
 			\
-				ComputeTitleStr(titleStr, __LINE__, bRes);\
-				ComputeParamStr(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, __VA_ARGS__);\
+				ComputeTitle(titleStr, __LINE__, bRes);\
+				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -938,8 +938,8 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitleStr(#_func "(" #__VA_ARGS__ ")", __LINE__, bRes);\
-				ComputeParamStr(bRes, #__VA_ARGS__, __VA_ARGS__);\
+				ComputeTitle(#_func "(" #__VA_ARGS__ ")", __LINE__, bRes);\
+				ComputeParam(bRes, #__VA_ARGS__, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -962,8 +962,8 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitleStr(#_func "(" #__VA_ARGS__ ") == " #_res, __LINE__, bRes);\
-				ComputeParamStr(bRes, #__VA_ARGS__ ", " #_func "(), " #_res, __VA_ARGS__, result, _res);\
+				ComputeTitle(#_func "(" #__VA_ARGS__ ") == " #_res, __LINE__, bRes);\
+				ComputeParam(bRes, #__VA_ARGS__ ", " #_func "(), " #_res, __VA_ARGS__, result, _res);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -986,8 +986,8 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitleStr(#_caller "." #_func "(" #__VA_ARGS__ ")", __LINE__, bRes);\
-				ComputeParamStr(bRes, #_caller ", " #__VA_ARGS__, _caller, __VA_ARGS__);\
+				ComputeTitle(#_caller "." #_func "(" #__VA_ARGS__ ")", __LINE__, bRes);\
+				ComputeParam(bRes, #_caller ", " #__VA_ARGS__, _caller, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -1011,8 +1011,8 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitleStr(#_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __LINE__, bRes);\
-				ComputeParamStr(bRes, #_caller ", " #__VA_ARGS__ ", " #_caller "." #_func "(), " #_res, _caller, __VA_ARGS__, result, _res);\
+				ComputeTitle(#_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __LINE__, bRes);\
+				ComputeParam(bRes, #_caller ", " #__VA_ARGS__ ", " #_caller "." #_func "(), " #_res, _caller, __VA_ARGS__, result, _res);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -1036,8 +1036,8 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitleStr(#_lhs " " #_op " " #_rhs, __LINE__, bRes);\
-				ComputeParamStr(bRes, #_lhs ", " #_rhs, _lhs, _rhs);\
+				ComputeTitle(#_lhs " " #_op " " #_rhs, __LINE__, bRes);\
+				ComputeParam(bRes, #_lhs ", " #_rhs, _lhs, _rhs);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -1062,8 +1062,8 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitleStr(#_lhs " " #_op " " #_rhs " == " #_res, __LINE__, bRes);\
-				ComputeParamStr(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, _lhs, _rhs, result, _res);\
+				ComputeTitle(#_lhs " " #_op " " #_rhs " == " #_res, __LINE__, bRes);\
+				ComputeParam(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, _lhs, _rhs, result, _res);\
 				ComputeResult(bRes);\
 			}\
 		}
