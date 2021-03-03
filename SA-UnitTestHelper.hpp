@@ -119,6 +119,27 @@ namespace Sa
 			*	localExit 1 == failure.
 			*/
 			bool localExit = EXIT_SUCCESS;
+
+			/// Number of test run in this group.
+			unsigned int testNum = 0u;
+
+			/// Update values from predicate.
+			void Update(bool _pred)
+			{
+				++testNum;
+
+				if (!_pred)
+					localExit = EXIT_FAILURE;
+			}
+
+			/// Spreads values to parent group.
+			void Spread(Group& _parent)
+			{
+				if(localExit == EXIT_FAILURE)
+					_parent.localExit = EXIT_FAILURE;
+
+				_parent.testNum += testNum;
+			}
 		};
 
 
@@ -152,6 +173,9 @@ namespace Sa
 		{
 			std::fstream logFile;
 			std::string logFileName;
+
+			/// Number of test run.
+			unsigned int testNum = 0u;
 
 			void LogGroupTabs() noexcept;
 		}
@@ -229,6 +253,9 @@ namespace Sa
 
 				/// Color used for group begin.
 				GroupEnd,
+
+				/// Color used for test number.
+				TestNum,
 			};
 
 		#if _WIN32
@@ -249,6 +276,9 @@ namespace Sa
 						break;
 					case CslColor::Failure:
 						SetConsoleTextAttribute(hConsole, 12);
+						break;
+					case CslColor::TestNum:
+						SetConsoleTextAttribute(hConsole, 6);
 						break;
 					case CslColor::GroupBegin:
 						SetConsoleTextAttribute(hConsole, 3);
@@ -349,7 +379,13 @@ namespace Sa
 				LogGroupTabs();
 				SetConsoleColor(CslColor::GroupEnd);
 
-				__SA_UTH_LOG_IN("[SA-UTH] Group:\t" << _group.name << " exit with code: ");
+				__SA_UTH_LOG_IN("[SA-UTH] Group:\t" << _group.name << " run: ");
+
+				SetConsoleColor(CslColor::TestNum);
+				__SA_UTH_LOG_IN(_group.testNum);
+
+				SetConsoleColor(CslColor::GroupEnd);
+				__SA_UTH_LOG_IN(" and exit with code: ");
 
 				if (_group.localExit == EXIT_SUCCESS)
 				{
@@ -469,7 +505,13 @@ namespace Sa
 			bFileLog = SA_UTH_DEFAULT_FILE_LOG;
 
 			SetConsoleColor(CslColor::Exit);
-			__SA_UTH_LOG_IN("[SA-UTH] Exit with code: ");
+			__SA_UTH_LOG_IN("[SA-UTH] Run: ");
+
+			SetConsoleColor(CslColor::TestNum);
+			__SA_UTH_LOG_IN(testNum);
+
+			SetConsoleColor(CslColor::Exit);
+			__SA_UTH_LOG_IN(" and exit with code: ");
 
 			if (exit == EXIT_SUCCESS)
 			{
@@ -561,25 +603,15 @@ namespace Sa
 					GroupBeginCB(_name);
 			}
 
-			/// Update current group from test result.
-			void GroupUpdate(bool _pred)
-			{
-				if (!groups.empty())
-				{
-					if (!_pred)
-						groups.top().localExit = EXIT_FAILURE;
-				}
-			}
-
 			/// End a group of tests.
 			Group GroupEnd()
 			{
 				Group group = groups.top();
 				groups.pop();
 
-				// Spread local exit to parent.
+				// Spread values to parent.
 				if (!groups.empty())
-					GroupUpdate(groups.top().localExit == EXIT_SUCCESS);
+					group.Spread(groups.top());
 
 				if ((verbosity & Verbosity::GroupExit) && ShouldLog())
 					GroupEndLog(group);
@@ -769,6 +801,16 @@ namespace Sa
 
 		namespace Internal
 		{
+			/// Update UTH module from predicate.
+			void Update(bool _pred)
+			{
+				++testNum;
+
+				if (!groups.empty())
+					groups.top().Update(_pred);
+			}
+			
+
 			/// Compute title from function declaration and line num.
 			void ComputeTitleStr(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
 			{
@@ -867,7 +909,7 @@ namespace Sa
 			using namespace Sa::UTH::Internal;\
 		\
 			bool bRes = UTH::Equals(_lhs, _rhs, __VA_ARGS__);\
-			GroupUpdate(bRes);\
+			Sa::UTH::Internal::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -892,7 +934,7 @@ namespace Sa
 			using namespace Sa::UTH::Internal;\
 		\
 			bool bRes = _func(__VA_ARGS__);\
-			GroupUpdate(bRes);\
+			Sa::UTH::Internal::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -916,7 +958,7 @@ namespace Sa
 		\
 			auto result = _func(__VA_ARGS__);\
 			bool bRes = result == _res;\
-			GroupUpdate(bRes);\
+			Sa::UTH::Internal::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -940,7 +982,7 @@ namespace Sa
 			using namespace Sa::UTH::Internal;\
 		\
 			bool bRes = _caller._func(__VA_ARGS__);\
-			GroupUpdate(bRes);\
+			Sa::UTH::Internal::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -965,7 +1007,7 @@ namespace Sa
 		\
 			auto result = _caller._func(__VA_ARGS__);\
 			bool bRes = result == _res;\
-			GroupUpdate(bRes);\
+			Sa::UTH::Internal::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -990,7 +1032,7 @@ namespace Sa
 			using namespace Sa::UTH::Internal;\
 		\
 			bool bRes = _lhs _op _rhs;\
-			GroupUpdate(bRes);\
+			Sa::UTH::Internal::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -1016,7 +1058,7 @@ namespace Sa
 		\
 			auto result = _lhs _op _rhs;\
 			bool bRes = result == _res;\
-			GroupUpdate(bRes);\
+			Sa::UTH::Internal::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
