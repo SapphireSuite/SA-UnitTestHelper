@@ -689,38 +689,66 @@ namespace Sa
 #pragma region ToString
 
 		/**
+		*	\brief Stringizer used to print elem during unit testing.
+		*
+		*	Default implementation tries to call _elem.ToString() if any ToString() function is defined in T.
+		*	Define template specialization for complex class custom implementation.
+		*	Allows template partial specialization (ex: Stringizer<MyClass<T>>).
+		*
+		*	\tparam T			Type of element.
+		*/
+		template <typename T>
+		class Stringizer
+		{
+		public:
+			/**
+			*	Default implementation of stringizer
+			* 
+			*	\param[in] _elem	Element to convert to string.
+			* 
+			*	\return	std::string from converted element.
+			*/
+			static std::string Value(const T& _elem) noexcept
+			{
+				if constexpr (std::is_arithmetic<T>::value)
+					return std::to_string(_elem);
+				else if constexpr (std::is_pointer<T>::value)
+					return std::string("Addr: ") + std::to_string(reinterpret_cast<unsigned __int64>(_elem));
+				else if constexpr (Internal::HM_ToString<T>::value)
+					return _elem.ToString();
+				else
+					return std::string();
+			}
+		};
+
+		/**
 		*	\brief ToString implementation used to print elem during unit testing.
 		*
-		*	Default implementation is _elem.ToString(). Define template specialization for custom implementation.
-		*
+		*	Default implementation: helper to call Stringizer using template deduction.
+		*	Define template specialization for simple class custom implementation.
+		* 
 		*	\tparam T			Type of element.
 		*	\param[in] _elem	Element to convert to string.
 		*
-		*	\return	std::string from converted element.
+		*	\return	std::string from converted element using stringizer.
 		*/
 		template <typename T>
 		std::string ToString(const T& _elem)
 		{
-			if constexpr (std::is_arithmetic<T>::value)
-				return std::to_string(_elem);
-			else if constexpr (std::is_pointer<T>::value)
-				return std::string("Addr: ") + std::to_string(reinterpret_cast<unsigned __int64>(_elem));
-			else if constexpr (Internal::HM_ToString<T>::value)
-				return _elem.ToString();
-			else
-				return std::string();
+			return Stringizer<T>::Value(_elem);
 		}
 
 		/**
 		*	\brief ToString implementation used to print tab of elems during unit testing.
 		*
-		*	Default implementation is for loop _elem.ToString(). Define template specialization for custom implementation.
+		*	Default implementation is for loop ToString(_elem).
+		*	Define template specialization for custom implementation.
 		*
 		*	\tparam T			Type of element.
 		*	\tparam size		Size of elem tab.
 		*	\param[in] _elems	Element to convert to string.
 		*
-		*	\return	std::string from converted element.
+		*	\return	std::string from converted elements  using stringizer.
 		*/
 		template <typename T, unsigned int size>
 		std::string ToString(const T(&_elems)[size])

@@ -37,16 +37,20 @@ struct Vec2
 	}
 };
 
-// Custom definition of UTH::ToString because Ex_Vec2 does not define a ToString() method.
+// Custom definition of UTH::Stringizer (complex way) because Vec2 does not define a ToString() method.
 template <>
-std::string UTH::ToString<Vec2>(const Vec2& _elem)
+class UTH::Stringizer<Vec2>
 {
-	std::string res;
+public:
+	static std::string Value(const Vec2& _elem)
+	{
+		std::string res;
 
-	res = "X: " + std::to_string(_elem.x) + "\tY: " + std::to_string(_elem.y);
+		res = "X: " + std::to_string(_elem.x) + "\tY: " + std::to_string(_elem.y);
 
-	return res;
-}
+		return res;
+	}
+};
 
 bool GlobalValidate(bool _pred)
 {
