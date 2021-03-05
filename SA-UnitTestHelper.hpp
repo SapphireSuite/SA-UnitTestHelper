@@ -31,6 +31,14 @@ namespace Sa
 	{
 #pragma region Types & Vars
 
+	#ifndef SA_UTH_EXIT_ON_FAILURE
+		/**
+		*	\brief Wether to exit program on failure or continue next tests.
+		*	Can be defined within cmake options or before including the header.
+		*/
+		#define SA_UTH_EXIT_ON_FAILURE 0
+	#endif
+
 		/**
 		*	\brief Exit result from unit testing.
 		*
@@ -40,14 +48,6 @@ namespace Sa
 		*	exit 1 == failure.
 		*/
 		int exit = EXIT_SUCCESS;
-
-	#ifndef SA_UTH_EXIT_ON_FAILURE
-		/**
-		*	\brief Wether to exit program on failure or continue next tests.
-		*	Can be defined within cmake options or before including the header.
-		*/
-		#define SA_UTH_EXIT_ON_FAILURE 0
-	#endif
 
 
 #pragma region Verbosity
@@ -374,7 +374,7 @@ namespace Sa
 			*
 			*	\param[in] _group	The group that ends.
 			*/
-			void GroupEndLog(const class UTH::Group& _group)
+			void GroupEndLog(const struct UTH::Group& _group)
 			{
 				LogGroupTabs();
 				SetConsoleColor(CslColor::GroupEnd);
@@ -477,7 +477,7 @@ namespace Sa
 			SetConsoleColor(CslColor::Init);
 
 			// Init rand.
-			srand(currTime);
+			srand(static_cast<unsigned int>(currTime));
 			SA_UTH_LOG("[SA-UTH] Init Rand seed: " << currTime);
 			
 			SetConsoleColor(CslColor::None);
@@ -790,7 +790,7 @@ namespace Sa
 		*	\return Random bool.
 		*/
 		template<>
-		bool Rand(bool _min, bool _max) { return Rand<int>(0, 2) == 1; }
+		bool Rand(bool _min, bool _max) { (void)_min; (void)_max; return Rand<int>(0, 2) == 1; }
 
 #pragma endregion
 
@@ -847,7 +847,7 @@ namespace Sa
 			template <typename FirstT, typename... Args>
 			void GenerateParamStr(std::vector<Param>& _result, std::string _paramNames, const FirstT& _first, const Args&... _args)
 			{
-				unsigned int index = _paramNames.find_first_of(',');
+				size_t index = _paramNames.find_first_of(',');
 
 				_result.push_back(Param{ _paramNames.substr(0u, index), ToString(_first) });
 

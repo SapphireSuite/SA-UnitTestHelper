@@ -11,6 +11,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Bin/UTH_Examples)		# .exe
 
 
 
+# === Compile features ===
+
+# Max warning level for tests.
+if(MSVC)
+	target_compile_options(SA-UnitTestHelper INTERFACE /W4)
+else()
+	target_compile_options(SA-UnitTestHelper INTERFACE -Wall -Wextra)
+endif()
+
+
+
 # === EntryPoints ===
 
 add_subdirectory(MacroEquals)
