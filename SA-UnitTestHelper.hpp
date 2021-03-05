@@ -178,6 +178,49 @@ namespace Sa
 			unsigned int testNum = 0u;
 
 			void LogGroupTabs() noexcept;
+
+
+			/**
+			*	Compile time check type T has member ToString using SFINAE.
+			* 
+			*	// TODO: Update source with new engine.
+			*	Source: https://github.com/sapphire-devteam/Sapphire/blob/dev/Engine/Include/Sapphire/Core/Reflection/HasMember.hpp
+			*
+			*/
+			template <typename T>
+			class HM_ToString
+			{
+				/// SFINAE success type.
+				using Yes = char;
+
+				/// SFINAE failure type.
+				using No = char[2];
+
+				/// template deduction helper.
+				template<typename C, C> struct CheckT;
+
+				/// Introduce Name member.
+				struct Fallback
+				{
+					/// Dummy variable with name Name for SFINAE deduction.
+					int ToString;
+				};
+
+				/// Merge T and Fallback members.
+				struct Derived : T, Fallback { };
+
+				template<typename C, C> struct ChT;
+
+				template <typename C>
+				static Yes& SFINAE(ChT<int Fallback::*, &C::ToString>* _c);
+
+				template <typename C>
+				static No& SFINAE(...);
+
+			public:
+				/// true if T as a public member called Name (ie: SFINAE failure), otherwise false.
+				static constexpr bool value = sizeof(SFINAE<Derived>(0)) == sizeof(No);
+			};
 		}
 
 		/// \endcond
@@ -256,6 +299,9 @@ namespace Sa
 
 				/// Color used for test number.
 				TestNum,
+
+				/// Color used for param warning.
+				ParamWarning,
 			};
 
 		#if _WIN32
@@ -291,6 +337,9 @@ namespace Sa
 						break;
 					case CslColor::Exit:
 						SetConsoleTextAttribute(hConsole, 13);
+						break;
+					case CslColor::ParamWarning:
+						SetConsoleTextAttribute(hConsole, 6);
 						break;
 					default:
 						SA_UTH_LOG("CslColor not supported yet!");
@@ -448,7 +497,16 @@ namespace Sa
 					if(verbosity & Verbosity::ParamsName)
 						SA_UTH_LOG(it->name << ':');
 
-					SA_UTH_LOG(it->value);
+					// ToString not implemented.
+					if (it->value.empty())
+					{
+						__SA_UTH_LOG_IN("-No debug string-\t");
+						SetConsoleColor(CslColor::ParamWarning);
+						__SA_UTH_LOG_IN("Implement ToString() in class or UTH::ToString template specialization.");
+						SetConsoleColor(CslColor::None);
+					}
+					else
+						SA_UTH_LOG(it->value);
 				}
 			}
 		}
@@ -647,8 +705,10 @@ namespace Sa
 				return std::to_string(_elem);
 			else if constexpr (std::is_pointer<T>::value)
 				return std::string("Addr: ") + std::to_string(reinterpret_cast<unsigned __int64>(_elem));
-			else
+			else if constexpr (Internal::HM_ToString<T>::value)
 				return _elem.ToString();
+			else
+				return std::string();
 		}
 
 		/**
