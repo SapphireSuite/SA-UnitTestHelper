@@ -890,8 +890,8 @@ namespace Sa
 				if (!ShouldLog() && !ParamsCB)
 					return;
 
-				if (_pred && (verbosity & ParamsSuccess) ||		// Should output params on success.
-					!_pred && (verbosity & ParamsFailure))		// Should output params on failure.
+				if ((_pred && (verbosity & ParamsSuccess)) ||		// Should output params on success.
+					(!_pred && (verbosity & ParamsFailure)))		// Should output params on failure.
 				{
 					std::vector<Param> params;
 					GenerateParamStr(params, _paramNames, _args...);

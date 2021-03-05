@@ -55,6 +55,8 @@ bool GlobalValidate(bool _pred)
 
 int GlobalAdd(int _i, int _j)
 {
+	(void)_j;
+
 	// ERROR.
 	return _i + _i;
 }

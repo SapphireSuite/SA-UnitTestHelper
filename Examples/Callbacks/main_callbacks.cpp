@@ -9,6 +9,7 @@ void GroupBeginCB(const std::string& _name)
 {
 	// Get UserData.
 	int& myUserData = UTH::GetUserData<int>();
+	(void)myUserData;
 
 	LOG("Group of test [" << _name << "] started\n");
 }
