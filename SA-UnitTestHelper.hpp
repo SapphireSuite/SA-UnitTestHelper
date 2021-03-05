@@ -123,7 +123,11 @@ namespace Sa
 			/// Number of test run in this group.
 			unsigned int testNum = 0u;
 
-			/// Update values from predicate.
+			/**
+			*	\brief Update values from predicate.
+			*
+			*	\param[in] _pred	predicate from current test.
+			*/
 			void Update(bool _pred)
 			{
 				++testNum;
@@ -132,7 +136,11 @@ namespace Sa
 					localExit = EXIT_FAILURE;
 			}
 
-			/// Spreads values to parent group.
+			/**
+			*	\brief Spreads values to parent group.
+			*
+			*	\param[in] _parent	parent to spread values to.
+			*/
 			void Spread(Group& _parent)
 			{
 				if(localExit == EXIT_FAILURE)
