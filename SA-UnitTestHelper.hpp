@@ -185,6 +185,7 @@ namespace Sa
 			/// Number of test run.
 			unsigned int testNum = 0u;
 
+			std::string GroupTabStr() noexcept;
 			void LogGroupTabs() noexcept;
 
 
@@ -413,6 +414,29 @@ namespace Sa
 				return bCslLog || bFileLog;
 			}
 
+			/**
+			*	\brief Indent in-string \n with group tabs.
+			* 
+			*	\param[in] _str		String to indent.
+			* 
+			*	\return	indented string.
+			*/
+			std::string IndentStr(std::string _str)
+			{
+				const std::string indentStr = std::string("\n") + GroupTabStr();
+
+				size_t index = _str.find('\n');
+
+				while (index != std::string::npos)
+				{
+					_str.replace(index, 1, indentStr);
+
+					index = _str.find('\n', index + indentStr.size());
+				}
+
+				return _str;
+			}
+
 
 			/**
 			*	\brief GroupBegin output in console.
@@ -514,7 +538,7 @@ namespace Sa
 						SetConsoleColor(CslColor::None);
 					}
 					else
-						SA_UTH_LOG(it->value);
+						SA_UTH_LOG(IndentStr(it->value));
 				}
 			}
 		}
@@ -650,10 +674,15 @@ namespace Sa
 		{
 			std::stack<Group> groups;
 
+			std::string GroupTabStr() noexcept
+			{
+				return std::string(groups.size(), '\t');
+			}
+
 			void LogGroupTabs() noexcept
 			{
 				if(groups.size())
-					__SA_UTH_LOG_IN(std::string(groups.size(), '\t'));
+					__SA_UTH_LOG_IN(GroupTabStr());
 			}
 
 			/// Start a new group of tests.
