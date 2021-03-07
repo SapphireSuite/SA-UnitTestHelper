@@ -47,7 +47,7 @@ namespace Sa
 		*	exit 0 == success.
 		*	exit 1 == failure.
 		*/
-		int exit = EXIT_SUCCESS;
+		inline int exit = EXIT_SUCCESS;
 
 
 #pragma region Verbosity
@@ -88,7 +88,7 @@ namespace Sa
 		};
 
 		/// Current verbosity level.
-		unsigned int verbosity = Default;
+		inline unsigned int verbosity = Default;
 
 #pragma endregion
 
@@ -160,7 +160,7 @@ namespace Sa
 	#endif
 
 		/// Dynamic console log toogle.
-		bool bCslLog = SA_UTH_DEFAULT_CSL_LOG;
+		inline bool bCslLog = SA_UTH_DEFAULT_CSL_LOG;
 
 
 	#ifndef SA_UTH_DEFAULT_FILE_LOG
@@ -172,21 +172,21 @@ namespace Sa
 	#endif
 
 		/// Dynamic file log toogle.
-		bool bFileLog = SA_UTH_DEFAULT_FILE_LOG;
+		inline bool bFileLog = SA_UTH_DEFAULT_FILE_LOG;
 
 		/// \cond Internal
 
 		/// Internal implementation namespace.
 		namespace Internal
 		{
-			std::fstream logFile;
-			std::string logFileName;
+			inline std::fstream logFile;
+			inline std::string logFileName;
 
 			/// Number of test run.
-			unsigned int testNum = 0u;
+			inline unsigned int testNum = 0u;
 
-			std::string GroupTabStr() noexcept;
-			void LogGroupTabs() noexcept;
+			inline std::string GroupTabStr() noexcept;
+			inline void LogGroupTabs() noexcept;
 
 
 			/**
@@ -314,9 +314,9 @@ namespace Sa
 			};
 
 		#if _WIN32
-			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+			inline HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-			void SetConsoleColor(CslColor _result)
+			inline void SetConsoleColor(CslColor _result)
 			{
 				switch (_result)
 				{
@@ -356,7 +356,7 @@ namespace Sa
 				}
 			}
 		#else
-			void SetConsoleColor(CslColor _result)
+			inline void SetConsoleColor(CslColor _result)
 			{
 				(void)_result;
 			}
@@ -367,7 +367,7 @@ namespace Sa
 			*
 			*	\param[in] _time	Time used to name the log file.
 			*/
-			void OpenLogFile(time_t _time)
+			inline void OpenLogFile(time_t _time)
 			{
 				struct tm timeinfo;
 				localtime_s(&timeinfo, &_time);
@@ -394,7 +394,7 @@ namespace Sa
 			* 
 			*	Delete file if empty.
 			*/
-			void CloseLogFile()
+			inline void CloseLogFile()
 			{
 				logFile.close();
 
@@ -409,7 +409,7 @@ namespace Sa
 			* 
 			*	\return log toggle.
 			*/
-			bool ShouldLog() noexcept
+			inline bool ShouldLog() noexcept
 			{
 				return bCslLog || bFileLog;
 			}
@@ -421,7 +421,7 @@ namespace Sa
 			* 
 			*	\return	indented string.
 			*/
-			std::string IndentStr(std::string _str)
+			inline std::string IndentStr(std::string _str)
 			{
 				const std::string indentStr = std::string("\n") + GroupTabStr();
 
@@ -443,7 +443,7 @@ namespace Sa
 			*
 			*	\param[in] _name	The name of the group that begins.
 			*/
-			void GroupBeginLog(const std::string& _name)
+			inline void GroupBeginLog(const std::string& _name)
 			{
 				SetConsoleColor(CslColor::GroupBegin);
 				SA_UTH_LOG("[SA-UTH] Group:\t" << _name);
@@ -455,7 +455,7 @@ namespace Sa
 			*
 			*	\param[in] _group	The group that ends.
 			*/
-			void GroupEndLog(const struct UTH::Group& _group)
+			inline void GroupEndLog(const struct UTH::Group& _group)
 			{
 				LogGroupTabs();
 				SetConsoleColor(CslColor::GroupEnd);
@@ -491,7 +491,7 @@ namespace Sa
 			*	\param[in] _lineNum		Line number of the function's call.
 			*	\param[_pred]			Result of the test.
 			*/
-			void TitleLog(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
+			inline void TitleLog(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
 			{
 				SetConsoleColor(CslColor::Title);
 
@@ -522,7 +522,7 @@ namespace Sa
 			*
 			*	\param[in] _paramStrs	Every param infos extracted from call.
 			*/
-			void ParamsLog(const std::vector<Param>& _params)
+			inline void ParamsLog(const std::vector<Param>& _params)
 			{
 				for (auto it = _params.begin(); it != _params.end(); ++it)
 				{
@@ -554,7 +554,7 @@ namespace Sa
 		*	\brief Init function to be called at the start of main.
 		*	Use SA_UTH_INIT() as helper macro.
 		*/
-		void Init()
+		inline void Init()
 		{
 			using namespace Internal;
 
@@ -586,7 +586,7 @@ namespace Sa
 		* 
 		*	\return exit code of all tests run.
 		*/
-		int Exit()
+		inline int Exit()
 		{
 			using namespace Internal;
 
@@ -636,7 +636,7 @@ namespace Sa
 #pragma region Callback
 
 		/// Pointer to allow user to get custom data in callbacks.
-		void* UserData = nullptr;
+		inline void* UserData = nullptr;
 
 		/**
 		*	\brief Helper get user data with type.
@@ -646,22 +646,22 @@ namespace Sa
 		*	\return User data casted as T.
 		*/
 		template<typename T>
-		T& GetUserData() { return *reinterpret_cast<T*>(UserData); }
+		inline T& GetUserData() { return *reinterpret_cast<T*>(UserData); }
 
 		/// Callback called on groupe begin.
-		void (*GroupBeginCB)(const std::string& _name) = nullptr;
-		
+		inline void (*GroupBeginCB)(const std::string& _name) = nullptr;
+
 		/// Callback called on groupe end.
-		void (*GroupEndCB)(const Group& _group) = nullptr;
-		
+		inline void (*GroupEndCB)(const Group& _group) = nullptr;
+
 		/// Callback called on test's title processing.
-		void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum, bool _pred) = nullptr;
-		
+		inline void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum, bool _pred) = nullptr;
+
 		/// Callback called on test's parameters processing.
-		void (*ParamsCB)(const std::vector<Param>& _params) = nullptr;
-		
+		inline void (*ParamsCB)(const std::vector<Param>& _params) = nullptr;
+
 		/// Callback called on test's result processing.
-		void (*ResultCB)(bool _pred) = nullptr;
+		inline void (*ResultCB)(bool _pred) = nullptr;
 
 #pragma endregion
 
@@ -672,21 +672,21 @@ namespace Sa
 
 		namespace Internal
 		{
-			std::stack<Group> groups;
+			inline std::stack<Group> groups;
 
-			std::string GroupTabStr() noexcept
+			inline std::string GroupTabStr() noexcept
 			{
 				return std::string(groups.size(), '\t');
 			}
 
-			void LogGroupTabs() noexcept
+			inline void LogGroupTabs() noexcept
 			{
 				if(groups.size())
 					__SA_UTH_LOG_IN(GroupTabStr());
 			}
 
 			/// Start a new group of tests.
-			void GroupBegin(const std::string& _name)
+			inline void GroupBegin(const std::string& _name)
 			{
 				// Log before push for log indentation.
 				if ((verbosity & Verbosity::GroupStart) && ShouldLog())
@@ -699,7 +699,7 @@ namespace Sa
 			}
 
 			/// End a group of tests.
-			Group GroupEnd()
+			inline Group GroupEnd()
 			{
 				Group group = groups.top();
 				groups.pop();
@@ -915,7 +915,7 @@ namespace Sa
 		*	\return Random bool.
 		*/
 		template<>
-		bool Rand(bool _min, bool _max) { (void)_min; (void)_max; return Rand<int>(0, 2) == 1; }
+		inline bool Rand(bool _min, bool _max) { (void)_min; (void)_max; return Rand<int>(0, 2) == 1; }
 
 #pragma endregion
 
@@ -927,7 +927,7 @@ namespace Sa
 		namespace Internal
 		{
 			/// Update UTH module from predicate.
-			void Update(bool _pred)
+			inline void Update(bool _pred)
 			{
 				++testNum;
 
@@ -937,7 +937,7 @@ namespace Sa
 			
 
 			/// Compute title from function declaration and line num.
-			void ComputeTitle(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
+			inline void ComputeTitle(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
 			{
 				if(ShouldLog())
 					TitleLog(_funcDecl, _lineNum, _pred);
@@ -982,7 +982,7 @@ namespace Sa
 
 
 			/// Compute the result using _pred predicate.
-			void ComputeResult(bool _pred)
+			inline void ComputeResult(bool _pred)
 			{
 				if (!_pred)
 					Sa::UTH::exit = EXIT_FAILURE;
@@ -997,7 +997,7 @@ namespace Sa
 			}
 
 			/// Wether to continue computing test with predicate _pred.
-			bool ShouldComputeTest(bool _pred)
+			inline bool ShouldComputeTest(bool _pred)
 			{
 				return !_pred || (verbosity & Verbosity::Success);
 			}
