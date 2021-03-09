@@ -1106,7 +1106,7 @@ namespace Sa
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
-			bool bRes = _caller._func(__VA_ARGS__);\
+			bool bRes = (_caller)._func(__VA_ARGS__);\
 			Sa::UTH::Internal::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
@@ -1130,7 +1130,7 @@ namespace Sa
 		{\
 			using namespace Sa::UTH::Internal;\
 		\
-			auto result = _caller._func(__VA_ARGS__);\
+			auto result = (_caller)._func(__VA_ARGS__);\
 			bool bRes = result == _res;\
 			Sa::UTH::Internal::Update(bRes);\
 		\
