@@ -1004,9 +1004,9 @@ namespace Sa
 
 			/// \brief Helper function for size of VA_ARGS (handle empty args).
 			template <typename... Args>
-			unsigned int SizeOfArgs(const Args&... _args)
+			unsigned int SizeOfArgs(const Args&...)
 			{
-				return sizeof...(_args);
+				return sizeof...(Args);
 			}
 		}
 
