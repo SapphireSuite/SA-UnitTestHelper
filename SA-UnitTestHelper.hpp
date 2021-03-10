@@ -151,28 +151,28 @@ namespace Sa
 		};
 
 
-	#ifndef SA_UTH_DEFAULT_CSL_LOG
+	#ifndef SA_UTH_DFLT_CSL_LOG
 		/**
 		*	\brief Wether to log tests in console by default.
 		*	Can be defined within cmake options or before including the header.
 		*/
-		#define SA_UTH_DEFAULT_CSL_LOG 0
+		#define SA_UTH_DFLT_CSL_LOG 0
 	#endif
 
 		/// Dynamic console log toogle.
-		inline bool bCslLog = SA_UTH_DEFAULT_CSL_LOG;
+		inline bool bCslLog = SA_UTH_DFLT_CSL_LOG;
 
 
-	#ifndef SA_UTH_DEFAULT_FILE_LOG
+	#ifndef SA_UTH_DFLT_FILE_LOG
 		/**
 		*	\brief Wether to log tests in file by default.
 		*	Can be defined within cmake options or before including the header.
 		*/
-		#define SA_UTH_DEFAULT_FILE_LOG 0
+		#define SA_UTH_DFLT_FILE_LOG 0
 	#endif
 
 		/// Dynamic file log toogle.
-		inline bool bFileLog = SA_UTH_DEFAULT_FILE_LOG;
+		inline bool bFileLog = SA_UTH_DFLT_FILE_LOG;
 
 		/// \cond Internal
 
@@ -591,8 +591,8 @@ namespace Sa
 			using namespace Internal;
 
 			// Reset to default.
-			bCslLog = SA_UTH_DEFAULT_CSL_LOG;
-			bFileLog = SA_UTH_DEFAULT_FILE_LOG;
+			bCslLog = SA_UTH_DFLT_CSL_LOG;
+			bFileLog = SA_UTH_DFLT_FILE_LOG;
 
 			SetConsoleColor(CslColor::Exit);
 			__SA_UTH_LOG_IN("[SA-UTH] Run: ");
