@@ -369,6 +369,8 @@ namespace Sa
 			*/
 			inline void OpenLogFile(time_t _time)
 			{
+				std::filesystem::create_directories("Logs");
+
 				struct tm timeinfo;
 				localtime_s(&timeinfo, &_time);
 
@@ -377,7 +379,7 @@ namespace Sa
 				*	Ex: 2/27/2021 at 12:07:43
 				*	log_backup-2.27.2021-12h07m43s.txt
 				*/
-				logFileName = std::string("log_UTH-") +
+				logFileName = std::string("Logs/log_UTH-") +
 					std::to_string(timeinfo.tm_mon + 1) + '.' +
 					std::to_string(timeinfo.tm_mday) + '.' +
 					std::to_string(timeinfo.tm_year + 1900) + '-' +
