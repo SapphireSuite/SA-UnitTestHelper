@@ -489,7 +489,7 @@ namespace Sa
 			*
 			*	\param[in] _funcDecl	Declaration of the function as a string.
 			*	\param[in] _lineNum		Line number of the function's call.
-			*	\param[_pred]			Result of the test.
+			*	\param[in] _pred		Result of the test.
 			*/
 			inline void TitleLog(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
 			{
@@ -520,7 +520,7 @@ namespace Sa
 			/**
 			*	\brief Test parameters output in console.
 			*
-			*	\param[in] _paramStrs	Every param infos extracted from call.
+			*	\param[in] _params	Every param infos extracted from call.
 			*/
 			inline void ParamsLog(const std::vector<Param>& _params)
 			{
