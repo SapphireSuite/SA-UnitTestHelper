@@ -192,8 +192,7 @@ namespace Sa
 			/**
 			*	Compile time check type T has member ToString using SFINAE.
 			* 
-			*	// TODO: Update source with new engine.
-			*	Source: https://github.com/sapphire-devteam/Sapphire/blob/dev/Engine/Include/Sapphire/Core/Reflection/HasMember.hpp
+			*	Source: https://github.com/sapphire-devteam/SA-Core/blob/main/Include/SA-Core/Misc/HasMember.hpp
 			*
 			*/
 			template <typename T>
