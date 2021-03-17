@@ -177,7 +177,7 @@ namespace Sa
 		/// \cond Internal
 
 		/// Internal implementation namespace.
-		namespace Internal
+		namespace Intl
 		{
 			inline std::fstream logFile;
 			inline std::string logFileName;
@@ -247,7 +247,7 @@ namespace Sa
 		#define SA_UTH_LOG(_str)\
 		{\
 			using namespace Sa::UTH;\
-			using namespace Sa::UTH::Internal;\
+			using namespace Sa::UTH::Intl;\
 		\
 			LogGroupTabs();\
 			if (bCslLog) std::cout << _str << std::endl;\
@@ -258,7 +258,7 @@ namespace Sa
 		#define __SA_UTH_LOG_IN(_str)\
 		{\
 			using namespace Sa::UTH;\
-			using namespace Sa::UTH::Internal;\
+			using namespace Sa::UTH::Intl;\
 		\
 			if (bCslLog) std::cout << _str;\
 			if (bFileLog) logFile << _str;\
@@ -268,7 +268,7 @@ namespace Sa
 		#define __SA_UTH_LOG_ENDL()\
 		{\
 			using namespace Sa::UTH;\
-			using namespace Sa::UTH::Internal;\
+			using namespace Sa::UTH::Intl;\
 		\
 			if (bCslLog) std::cout << std::endl;\
 			if (bFileLog) logFile << std::endl;\
@@ -277,7 +277,7 @@ namespace Sa
 
 		/// \cond Internal
 
-		namespace Internal
+		namespace Intl
 		{
 			/// enum for console colors.
 			enum class CslColor
@@ -558,7 +558,7 @@ namespace Sa
 		*/
 		inline void Init()
 		{
-			using namespace Internal;
+			using namespace Intl;
 
 			time_t currTime = time(NULL);
 
@@ -590,7 +590,7 @@ namespace Sa
 		*/
 		inline int Exit()
 		{
-			using namespace Internal;
+			using namespace Intl;
 
 			// Reset to default.
 			bCslLog = SA_UTH_DFLT_CSL_LOG;
@@ -672,7 +672,7 @@ namespace Sa
 
 		/// \cond Internal
 
-		namespace Internal
+		namespace Intl
 		{
 			inline std::stack<Group> groups;
 
@@ -753,7 +753,7 @@ namespace Sa
 					return std::to_string(_elem);
 				else if constexpr (std::is_pointer<T>::value)
 					return std::string("Addr: ") + std::to_string(reinterpret_cast<unsigned __int64>(_elem));
-				else if constexpr (Internal::HM_ToString<T>::value)
+				else if constexpr (Intl::HM_ToString<T>::value)
 					return _elem.ToString();
 				else
 					return std::string();
@@ -926,7 +926,7 @@ namespace Sa
 
 		/// \cond Internal
 
-		namespace Internal
+		namespace Intl
 		{
 			/// Update UTH module from predicate.
 			inline void Update(bool _pred)
@@ -1033,10 +1033,10 @@ namespace Sa
 		*/
 		#define SA_UTH_EQ(_lhs, _rhs, ...)\
 		{\
-			using namespace Sa::UTH::Internal;\
+			using namespace Sa::UTH::Intl;\
 		\
 			bool bRes = UTH::Equals(_lhs, _rhs, __VA_ARGS__);\
-			Sa::UTH::Internal::Update(bRes);\
+			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -1058,10 +1058,10 @@ namespace Sa
 		*/
 		#define SA_UTH_SF(_func, ...)\
 		{\
-			using namespace Sa::UTH::Internal;\
+			using namespace Sa::UTH::Intl;\
 		\
 			bool bRes = _func(__VA_ARGS__);\
-			Sa::UTH::Internal::Update(bRes);\
+			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -1081,11 +1081,11 @@ namespace Sa
 		*/
 		#define SA_UTH_RSF(_res, _func, ...)\
 		{\
-			using namespace Sa::UTH::Internal;\
+			using namespace Sa::UTH::Intl;\
 		\
 			auto result = _func(__VA_ARGS__);\
 			bool bRes = result == _res;\
-			Sa::UTH::Internal::Update(bRes);\
+			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -1106,10 +1106,10 @@ namespace Sa
 		*/
 		#define SA_UTH_MF(_caller, _func, ...)\
 		{\
-			using namespace Sa::UTH::Internal;\
+			using namespace Sa::UTH::Intl;\
 		\
 			bool bRes = (_caller)._func(__VA_ARGS__);\
-			Sa::UTH::Internal::Update(bRes);\
+			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -1130,11 +1130,11 @@ namespace Sa
 		*/
 		#define SA_UTH_RMF(_res, _caller, _func, ...)\
 		{\
-			using namespace Sa::UTH::Internal;\
+			using namespace Sa::UTH::Intl;\
 		\
 			auto result = (_caller)._func(__VA_ARGS__);\
 			bool bRes = result == _res;\
-			Sa::UTH::Internal::Update(bRes);\
+			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -1156,10 +1156,10 @@ namespace Sa
 		*/
 		#define SA_UTH_OP(_lhs, _op, _rhs)\
 		{\
-			using namespace Sa::UTH::Internal;\
+			using namespace Sa::UTH::Intl;\
 		\
 			bool bRes = _lhs _op _rhs;\
-			Sa::UTH::Internal::Update(bRes);\
+			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -1181,11 +1181,11 @@ namespace Sa
 		*/
 		#define SA_UTH_ROP(_res, _lhs, _op, _rhs)\
 		{\
-			using namespace Sa::UTH::Internal;\
+			using namespace Sa::UTH::Intl;\
 		\
 			auto result = _lhs _op _rhs;\
 			bool bRes = result == _res;\
-			Sa::UTH::Internal::Update(bRes);\
+			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
@@ -1201,12 +1201,12 @@ namespace Sa
 		* 
 		*	\param[in] _name	Name of the group.
 		*/
-		#define SA_UTH_GPB(_name) Sa::UTH::Internal::GroupBegin(#_name);
+		#define SA_UTH_GPB(_name) Sa::UTH::Intl::GroupBegin(#_name);
 
 		/**
 		*	\brief End current group.
 		*/
-		#define SA_UTH_GPE() Sa::UTH::Internal::GroupEnd();
+		#define SA_UTH_GPE() Sa::UTH::Intl::GroupEnd();
 
 
 		/**
