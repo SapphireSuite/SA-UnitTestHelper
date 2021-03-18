@@ -748,27 +748,14 @@ namespace Sa
 		{
 			if constexpr (std::is_arithmetic<T>::value)
 				return std::to_string(_elem);
+			else if constexpr (std::is_pointer<T>::value)
+				return "0x" + std::to_string(reinterpret_cast<unsigned __int64>(_elem));
 			else if constexpr (Intl::HM_ToString<T>::value)
 				return _elem.ToString();
 			else
 				return std::string();
 		}
 
-		/**
-		*	\brief ToString implementation used to print a pointer during unit testing.
-		*
-		*	Define template specialization for simple class custom implementation.
-		*
-		*	\tparam T			Type of pointer.
-		*	\param[in] _ptr		Pointer to convert to string.
-		*
-		*	\return	std::string from pointer converted.
-		*/
-		template <typename T>
-		std::string ToString(const T* _ptr)
-		{
-			return "0x" + std::to_string(reinterpret_cast<unsigned __int64>(_elem));
-		}
 
 		/**
 		*	\brief ToString implementation used to print tab of elems during unit testing.
