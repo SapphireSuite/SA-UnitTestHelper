@@ -45,17 +45,25 @@ endif()
 
 # Default console log toggle value.
 option(SA_UTH_DFLT_CSL_LOG "Should Log tests in console by default" ON)
-target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_DFLT_CSL_LOG)
+if(SA_UTH_DFLT_CSL_LOG)
+	target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_DFLT_CSL_LOG)
+endif()
 
 
 # Default file log toggle value.
 option(SA_UTH_DFLT_FILE_LOG "Should Log tests in a file by default" ON)
-target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_DFLT_FILE_LOG)
+
+if(SA_UTH_DFLT_FILE_LOG)
+	target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_DFLT_FILE_LOG)
+endif()
 
 
 # Test exit on first failure.
 option(SA_UTH_EXIT_ON_FAILURE "Exit on first failure" OFF)
-target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_EXIT_ON_FAILURE)
+
+if(SA_UTH_EXIT_ON_FAILURE)
+	target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_EXIT_ON_FAILURE)
+endif()
 
 
 
