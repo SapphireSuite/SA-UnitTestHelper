@@ -748,27 +748,20 @@ namespace Sa
 		{
 			if constexpr (std::is_arithmetic<T>::value)
 				return std::to_string(_elem);
+			else if constexpr (std::is_pointer<T>::value)
+				return "0x" + std::to_string(reinterpret_cast<unsigned __int64>(_elem));
 			else if constexpr (Intl::HM_ToString<T>::value)
 				return _elem.ToString();
 			else
+			{
+#if SA_CORE_IMPL
+				return Sa::ToString(_elem);
+#else
 				return std::string();
+#endif
+			}
 		}
 
-		/**
-		*	\brief ToString implementation used to print a pointer during unit testing.
-		*
-		*	Define template specialization for simple class custom implementation.
-		*
-		*	\tparam T			Type of pointer.
-		*	\param[in] _ptr		Pointer to convert to string.
-		*
-		*	\return	std::string from pointer converted.
-		*/
-		template <typename T>
-		std::string ToString(const T* _ptr)
-		{
-			return "0x" + std::to_string(reinterpret_cast<unsigned __int64>(_elem));
-		}
 
 		/**
 		*	\brief ToString implementation used to print tab of elems during unit testing.
@@ -795,12 +788,6 @@ namespace Sa
 
 			return res;
 		}
-
-#if SA_CORE_IMPL
-	#define __SA_UTH_TO_STRING Sa::ToString
-#else
-	#define __SA_UTH_TO_STRING Sa::UTH::ToString
-#endif
 
 #pragma endregion
 
@@ -975,7 +962,7 @@ namespace Sa
 			{
 				size_t index = _paramNames.find_first_of(',');
 
-				_result.push_back(Param{ _paramNames.substr(0u, index), __SA_UTH_TO_STRING(_first) });
+				_result.push_back(Param{ _paramNames.substr(0u, index), Sa::UTH::ToString(_first) });
 
 				if constexpr (sizeof...(_args) != 0)
 					GenerateParamStr(_result, _paramNames.substr(index + 2), _args...);
