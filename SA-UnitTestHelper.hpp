@@ -753,7 +753,13 @@ namespace Sa
 			else if constexpr (Intl::HM_ToString<T>::value)
 				return _elem.ToString();
 			else
+			{
+#if SA_CORE_IMPL
+				return Sa::ToString(_elem);
+#else
 				return std::string();
+#endif
+			}
 		}
 
 
@@ -782,12 +788,6 @@ namespace Sa
 
 			return res;
 		}
-
-#if SA_CORE_IMPL
-	#define __SA_UTH_TO_STRING Sa::ToString
-#else
-	#define __SA_UTH_TO_STRING Sa::UTH::ToString
-#endif
 
 #pragma endregion
 
@@ -962,7 +962,7 @@ namespace Sa
 			{
 				size_t index = _paramNames.find_first_of(',');
 
-				_result.push_back(Param{ _paramNames.substr(0u, index), __SA_UTH_TO_STRING(_first) });
+				_result.push_back(Param{ _paramNames.substr(0u, index), Sa::UTH::ToString(_first) });
 
 				if constexpr (sizeof...(_args) != 0)
 					GenerateParamStr(_result, _paramNames.substr(index + 2), _args...);
