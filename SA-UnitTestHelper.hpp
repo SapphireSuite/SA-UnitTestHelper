@@ -498,7 +498,7 @@ namespace Sa
 			*	\param[in] _lineNum		Line number of the function's call.
 			*	\param[in] _pred		Result of the test.
 			*/
-			inline void TitleLog(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
+			inline void TitleLog(const std::string& _funcDecl, const std::string& _fileName, unsigned int _lineNum, bool _pred)
 			{
 				SetConsoleColor(CslColor::Title);
 
@@ -519,7 +519,7 @@ namespace Sa
 
 				SetConsoleColor(CslColor::Title);
 
-				__SA_UTH_LOG_IN(_funcDecl << " -- l:" << _lineNum << std::endl);
+				__SA_UTH_LOG_IN(_funcDecl << " -- " << _fileName << ":" << _lineNum << std::endl);
 
 				SetConsoleColor(CslColor::None);
 			}
@@ -662,7 +662,7 @@ namespace Sa
 		inline void (*GroupEndCB)(const Group& _group) = nullptr;
 
 		/// Callback called on test's title processing.
-		inline void (*TitleCB)(const std::string& _funcDecl, unsigned int _lineNum, bool _pred) = nullptr;
+		inline void (*TitleCB)(const std::string& _funcDecl, const std::string& _fileName, unsigned int _lineNum, bool _pred) = nullptr;
 
 		/// Callback called on test's parameters processing.
 		inline void (*ParamsCB)(const std::vector<Param>& _params) = nullptr;
@@ -925,13 +925,13 @@ namespace Sa
 			
 
 			/// Compute title from function declaration and line num.
-			inline void ComputeTitle(const std::string& _funcDecl, unsigned int _lineNum, bool _pred)
+			inline void ComputeTitle(const std::string& _funcDecl, const std::string& _fileName, unsigned int _lineNum, bool _pred)
 			{
 				if(ShouldLog())
-					TitleLog(_funcDecl, _lineNum, _pred);
+					TitleLog(_funcDecl, _fileName, _lineNum, _pred);
 
 				if (TitleCB)
-					TitleCB(_funcDecl, _lineNum, _pred);
+					TitleCB(_funcDecl, _fileName, _lineNum, _pred);
 			}
 
 
@@ -996,6 +996,28 @@ namespace Sa
 			{
 				return sizeof...(Args);
 			}
+
+			/// Getter of file name.
+			const char* GetFileNameFromPath(const char* _filePath) noexcept
+			{
+				// Remove characters until last backslash.
+				const char* fileName = strrchr(_filePath, '\\');
+
+				if (!fileName) // No backslash found.
+					fileName = _filePath;
+				else
+					fileName += 1; // Remove last '\\' found.
+
+
+				// Remove characters until last slash.
+				if (const char* filePathNoSlash = strrchr(fileName, '/'))
+				{
+					// Remove last '/' found.
+					fileName = filePathNoSlash + 1;
+				}
+
+				return fileName;
+			}
 		}
 
 		/// \endcond
@@ -1004,6 +1026,14 @@ namespace Sa
 
 
 #pragma region Macro
+
+		/// \cond Internal
+
+		/// Helper macro for file name.
+		#define __SA_UTH_FILE_NAME GetFileNameFromPath(__FILE__)
+
+		/// \endcond
+
 
 		/**
 		*	\brief Run a \e <b> Unit Test </b> using internal Equals implementation.
@@ -1028,7 +1058,7 @@ namespace Sa
 			{\
 				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + (SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
 			\
-				ComputeTitle(titleStr, __LINE__, bRes);\
+				ComputeTitle(titleStr, __SA_UTH_FILE_NAME, __LINE__, bRes);\
 				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -1051,7 +1081,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_func "(" #__VA_ARGS__ ")", __LINE__, bRes);\
+				ComputeTitle(#_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes);\
 				ComputeParam(bRes, #__VA_ARGS__, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -1075,7 +1105,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_func "(" #__VA_ARGS__ ") == " #_res, __LINE__, bRes);\
+				ComputeTitle(#_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes);\
 				ComputeParam(bRes, #__VA_ARGS__ ", " #_func "(), " #_res, __VA_ARGS__, result, _res);\
 				ComputeResult(bRes);\
 			}\
@@ -1099,7 +1129,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_caller "." #_func "(" #__VA_ARGS__ ")", __LINE__, bRes);\
+				ComputeTitle(#_caller "." #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes);\
 				ComputeParam(bRes, #_caller ", " #__VA_ARGS__, _caller, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -1124,7 +1154,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __LINE__, bRes);\
+				ComputeTitle(#_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes);\
 				ComputeParam(bRes, #_caller ", " #__VA_ARGS__ ", " #_caller "." #_func "(), " #_res, _caller, __VA_ARGS__, result, _res);\
 				ComputeResult(bRes);\
 			}\
@@ -1149,7 +1179,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_lhs " " #_op " " #_rhs, __LINE__, bRes);\
+				ComputeTitle(#_lhs " " #_op " " #_rhs, __SA_UTH_FILE_NAME, __LINE__, bRes);\
 				ComputeParam(bRes, #_lhs ", " #_rhs, _lhs, _rhs);\
 				ComputeResult(bRes);\
 			}\
@@ -1175,7 +1205,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_lhs " " #_op " " #_rhs " == " #_res, __LINE__, bRes);\
+				ComputeTitle(#_lhs " " #_op " " #_rhs " == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes);\
 				ComputeParam(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, _lhs, _rhs, result, _res);\
 				ComputeResult(bRes);\
 			}\
