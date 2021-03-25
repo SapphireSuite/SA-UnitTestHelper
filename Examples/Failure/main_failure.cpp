@@ -35,18 +35,13 @@ struct Vec2
 	{
 		return IsEqual(_rhs);
 	}
-};
 
-// Custom definition of UTH::Stringizer (complex way) because Vec2 does not define a ToString() method.
-template <>
-class UTH::Stringizer<Vec2>
-{
-public:
-	static std::string Value(const Vec2& _elem)
+	// In-class ToString definition
+	std::string ToString() const noexcept
 	{
 		std::string res;
 
-		res = "X: " + std::to_string(_elem.x) + "\tY: " + std::to_string(_elem.y);
+		res = "X: " + std::to_string(x) + "\tY: " + std::to_string(y);
 
 		return res;
 	}

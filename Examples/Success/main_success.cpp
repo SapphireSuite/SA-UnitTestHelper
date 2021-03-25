@@ -33,9 +33,9 @@ struct Vec2
 	}
 };
 
-// Custom definition of UTH::ToString (simple way) because Vec2 does not define a ToString() method.
+// Custom definition of UTH::ToString because Vec2 does not define a ToString() method.
 template <>
-std::string UTH::ToString<Vec2>(const Vec2& _elem)
+std::string UTH::ToString(const Vec2& _elem)
 {
 	std::string res;
 
