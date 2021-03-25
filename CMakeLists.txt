@@ -35,14 +35,6 @@ target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_IMPL)
 
 # === Option ===
 
-# Build examples.
-option(SA_UTH_EXAMPLES "Build SA-UnitTestHelper examples" OFF)
-
-if(SA_UTH_EXAMPLES)
-	add_subdirectory(Examples)
-endif()
-
-
 # Default console log toggle value.
 option(SA_UTH_DFLT_CSL_LOG "Should Log tests in console by default" ON)
 if(SA_UTH_DFLT_CSL_LOG)
@@ -67,7 +59,6 @@ endif()
 
 
 
-# === Tests ===
+# === Entrypoints ===
 
-# Enable testing for this directory and below.
-enable_testing()
+add_subdirectory(Examples)
