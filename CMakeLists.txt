@@ -56,9 +56,3 @@ option(SA_UTH_EXIT_ON_FAILURE "Exit on first failure" OFF)
 if(SA_UTH_EXIT_ON_FAILURE)
 	target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_EXIT_ON_FAILURE)
 endif()
-
-
-
-# === Entrypoints ===
-
-add_subdirectory(Examples)
