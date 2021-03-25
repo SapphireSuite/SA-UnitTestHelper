@@ -180,6 +180,49 @@ namespace Sa
 		/// Dynamic file log toogle.
 		inline bool bFileLog = SA_UTH_DFLT_FILE_LOG;
 
+
+#pragma region Callback
+
+		/// Pointer to allow user to get custom data in callbacks.
+		inline void* UserData = nullptr;
+
+		/**
+		*	\brief Helper get user data with type.
+		*
+		*	\tparam T	The type to cast user data.
+		*
+		*	\return User data casted as T.
+		*/
+		template<typename T>
+		inline T& GetUserData() { return *reinterpret_cast<T*>(UserData); }
+
+		/// Callback called on groupe begin.
+		inline void (*GroupBeginCB)(const std::string& _name) = nullptr;
+
+		/// Callback called on groupe end.
+		inline void (*GroupEndCB)(const Group& _group) = nullptr;
+
+
+		struct TitleInfos
+		{
+			const std::string& funcDecl;
+			const std::string& fileName;
+			unsigned int lineNum = 0u;
+			bool pred = false;
+		};
+
+		/// Callback called on test's title processing.
+		inline void (*TitleCB)(const TitleInfos& _infos) = nullptr;
+
+		/// Callback called on test's parameters processing.
+		inline void (*ParamsCB)(const std::vector<Param>& _params) = nullptr;
+
+		/// Callback called on test's result processing.
+		inline void (*ResultCB)(bool _pred) = nullptr;
+
+#pragma endregion
+
+
 		/// \cond Internal
 
 		/// Internal implementation namespace.
@@ -251,7 +294,6 @@ namespace Sa
 		*/
 		#define SA_UTH_LOG(_str)\
 		{\
-			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
 			LogGroupTabs();\
@@ -262,7 +304,6 @@ namespace Sa
 		/// Output only str as input.
 		#define __SA_UTH_LOG_IN(_str)\
 		{\
-			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
 			if (bCslLog) std::cout << _str;\
@@ -272,7 +313,6 @@ namespace Sa
 		/// Ouput only end of line.
 		#define __SA_UTH_LOG_ENDL()\
 		{\
-			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
 			if (bCslLog) std::cout << std::endl;\
@@ -498,7 +538,7 @@ namespace Sa
 			*	\param[in] _lineNum		Line number of the function's call.
 			*	\param[in] _pred		Result of the test.
 			*/
-			inline void TitleLog(const std::string& _funcDecl, const std::string& _fileName, unsigned int _lineNum, bool _pred)
+			inline void TitleLog(const TitleInfos& _infos)
 			{
 				SetConsoleColor(CslColor::Title);
 
@@ -506,7 +546,7 @@ namespace Sa
 				__SA_UTH_LOG_IN("[SA-UTH] ");
 
 				// Result.
-				if (_pred)
+				if (_infos.pred)
 				{
 					SetConsoleColor(CslColor::Success);
 					__SA_UTH_LOG_IN("Success ");
@@ -519,7 +559,7 @@ namespace Sa
 
 				SetConsoleColor(CslColor::Title);
 
-				__SA_UTH_LOG_IN(_funcDecl << " -- " << _fileName << ":" << _lineNum << std::endl);
+				__SA_UTH_LOG_IN(_infos.funcDecl << " -- " << _infos.fileName << ":" << _infos.lineNum << std::endl);
 
 				SetConsoleColor(CslColor::None);
 			}
@@ -636,39 +676,6 @@ namespace Sa
 		*	Should be used at the end of main.
 		*/
 		#define SA_UTH_EXIT() return Sa::UTH::Exit();
-
-#pragma endregion
-
-
-#pragma region Callback
-
-		/// Pointer to allow user to get custom data in callbacks.
-		inline void* UserData = nullptr;
-
-		/**
-		*	\brief Helper get user data with type.
-		*
-		*	\tparam T	The type to cast user data.
-		*
-		*	\return User data casted as T.
-		*/
-		template<typename T>
-		inline T& GetUserData() { return *reinterpret_cast<T*>(UserData); }
-
-		/// Callback called on groupe begin.
-		inline void (*GroupBeginCB)(const std::string& _name) = nullptr;
-
-		/// Callback called on groupe end.
-		inline void (*GroupEndCB)(const Group& _group) = nullptr;
-
-		/// Callback called on test's title processing.
-		inline void (*TitleCB)(const std::string& _funcDecl, const std::string& _fileName, unsigned int _lineNum, bool _pred) = nullptr;
-
-		/// Callback called on test's parameters processing.
-		inline void (*ParamsCB)(const std::vector<Param>& _params) = nullptr;
-
-		/// Callback called on test's result processing.
-		inline void (*ResultCB)(bool _pred) = nullptr;
 
 #pragma endregion
 
@@ -925,13 +932,13 @@ namespace Sa
 			
 
 			/// Compute title from function declaration and line num.
-			inline void ComputeTitle(const std::string& _funcDecl, const std::string& _fileName, unsigned int _lineNum, bool _pred)
+			inline void ComputeTitle(const TitleInfos& _infos)
 			{
 				if(ShouldLog())
-					TitleLog(_funcDecl, _fileName, _lineNum, _pred);
+					TitleLog(_infos);
 
 				if (TitleCB)
-					TitleCB(_funcDecl, _fileName, _lineNum, _pred);
+					TitleCB(_infos);
 			}
 
 
@@ -1049,6 +1056,7 @@ namespace Sa
 		*/
 		#define SA_UTH_EQ(_lhs, _rhs, ...)\
 		{\
+			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
 			bool bRes = UTH::Equals(_lhs, _rhs, __VA_ARGS__);\
@@ -1058,7 +1066,7 @@ namespace Sa
 			{\
 				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + (SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
 			\
-				ComputeTitle(titleStr, __SA_UTH_FILE_NAME, __LINE__, bRes);\
+				ComputeTitle(TitleInfos{ titleStr, __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -1074,6 +1082,7 @@ namespace Sa
 		*/
 		#define SA_UTH_SF(_func, ...)\
 		{\
+			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
 			bool bRes = _func(__VA_ARGS__);\
@@ -1081,7 +1090,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes);\
+				ComputeTitle(TitleInfos{ #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #__VA_ARGS__, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -1097,6 +1106,7 @@ namespace Sa
 		*/
 		#define SA_UTH_RSF(_res, _func, ...)\
 		{\
+			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
 			auto result = _func(__VA_ARGS__);\
@@ -1105,7 +1115,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes);\
+				ComputeTitle(TitleInfos{ #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #__VA_ARGS__ ", " #_func "(), " #_res, __VA_ARGS__, result, _res);\
 				ComputeResult(bRes);\
 			}\
@@ -1122,6 +1132,7 @@ namespace Sa
 		*/
 		#define SA_UTH_MF(_caller, _func, ...)\
 		{\
+			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
 			bool bRes = (_caller)._func(__VA_ARGS__);\
@@ -1129,7 +1140,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_caller "." #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes);\
+				ComputeTitle(TitleInfos{ #_caller "." #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #_caller ", " #__VA_ARGS__, _caller, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -1146,6 +1157,7 @@ namespace Sa
 		*/
 		#define SA_UTH_RMF(_res, _caller, _func, ...)\
 		{\
+			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
 			auto result = (_caller)._func(__VA_ARGS__);\
@@ -1154,7 +1166,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes);\
+				ComputeTitle(TitleInfos{ #_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #_caller ", " #__VA_ARGS__ ", " #_caller "." #_func "(), " #_res, _caller, __VA_ARGS__, result, _res);\
 				ComputeResult(bRes);\
 			}\
@@ -1172,6 +1184,7 @@ namespace Sa
 		*/
 		#define SA_UTH_OP(_lhs, _op, _rhs)\
 		{\
+			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
 			bool bRes = _lhs _op _rhs;\
@@ -1179,7 +1192,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_lhs " " #_op " " #_rhs, __SA_UTH_FILE_NAME, __LINE__, bRes);\
+				ComputeTitle(TitleInfos{ #_lhs " " #_op " " #_rhs, __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #_lhs ", " #_rhs, _lhs, _rhs);\
 				ComputeResult(bRes);\
 			}\
@@ -1197,6 +1210,7 @@ namespace Sa
 		*/
 		#define SA_UTH_ROP(_res, _lhs, _op, _rhs)\
 		{\
+			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
 			auto result = _lhs _op _rhs;\
@@ -1205,7 +1219,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(#_lhs " " #_op " " #_rhs " == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes);\
+				ComputeTitle(TitleInfos{ #_lhs " " #_op " " #_rhs " == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, _lhs, _rhs, result, _res);\
 				ComputeResult(bRes);\
 			}\

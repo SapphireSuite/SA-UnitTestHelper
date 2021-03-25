@@ -19,9 +19,9 @@ void GroupEndCB(const UTH::Group& _group)
 	LOG("Group of test [" << _group.name << "] exit with code: " << _group.localExit);
 }
 
-void TitleCB(const std::string& _funcDecl, const std::string& _fileName, unsigned int _lineNum, bool _pred)
+void TitleCB(const UTH::TitleInfos& _infos)
 {
-	LOG("Test: " << _pred << "\t" << _funcDecl << " in file: " << _fileName << " at line:" << _lineNum << '\n');
+	LOG("Test: " << _infos.pred << "\t" << _infos.funcDecl << " in file: " << _infos.fileName << " at line:" << _infos.lineNum << '\n');
 }
 
 void ParamsCB(const std::vector<UTH::Param>& _params)
