@@ -998,7 +998,7 @@ namespace Sa
 			}
 
 			/// Getter of file name.
-			const char* GetFileNameFromPath(const char* _filePath) noexcept
+			inline const char* GetFileNameFromPath(const char* _filePath) noexcept
 			{
 				// Remove characters until last backslash.
 				const char* fileName = strrchr(_filePath, '\\');
