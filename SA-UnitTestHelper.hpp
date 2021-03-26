@@ -35,15 +35,17 @@ namespace Sa
 	/// UnitTestHelper global namespace.
 	namespace UTH
 	{
-#pragma region Types & Vars
+#pragma region Hpp
 
-	#ifndef SA_UTH_EXIT_ON_FAILURE
+#pragma region Init / Exit
+
+#ifndef SA_UTH_EXIT_ON_FAILURE
 		/**
 		*	\brief Wether to exit program on failure or continue next tests.
 		*	Can be defined within cmake options or before including the header.
 		*/
 		#define SA_UTH_EXIT_ON_FAILURE 0
-	#endif
+#endif
 
 		/**
 		*	\brief Exit result from unit testing.
@@ -54,6 +56,39 @@ namespace Sa
 		*	exit 1 == failure.
 		*/
 		inline int exit = EXIT_SUCCESS;
+
+
+		namespace Intl
+		{
+			/**
+			*	\brief Init function to be called at the start of main.
+			*	Use SA_UTH_INIT() as helper macro.
+			*/
+			inline void Init();
+
+			/**
+			*	\brief Exit function to be called at the end of main.
+			*	Use SA_UTH_EXIT() as helper macro.
+			*
+			*	\return exit code of all tests run.
+			*/
+			inline int Exit();
+		}
+
+
+		/**
+		*	\brief Helper init program macro.
+		*	Should be used at the start of main.
+		*/
+		#define SA_UTH_INIT() Sa::UTH::Intl::Init();
+
+		/**
+		*	\brief Helper exit program macro.
+		*	Should be used at the end of main.
+		*/
+		#define SA_UTH_EXIT() return Sa::UTH::Intl::Exit();
+
+#pragma endregion
 
 
 #pragma region Verbosity
@@ -82,23 +117,280 @@ namespace Sa
 			/// Output group exit result.
 			GroupExit = 1 << 5,
 
+			/// Output group counter on exit.
+			GroupCount = 1 << 6,
+
 
 			/// Light verbosity value.
 			Light = ParamsName | ParamsFailure | GroupExit,
 
 			/// Default verbosity value.
-			Default = Success | ParamsName | ParamsFailure | GroupStart | GroupExit,
+			Default = Success | ParamsName | ParamsFailure | GroupStart | GroupExit | GroupCount,
 
 			/// Maximum verbosity level (all flags set).
 			Max = 0xFF
-		};
+	};
 
 		/// Current verbosity level.
 		inline unsigned int verbosity = Default;
 
 #pragma endregion
 
-		
+
+#pragma region Logger
+
+#ifndef SA_UTH_DFLT_CSL_LOG
+		/**
+		*	\brief Wether to log tests in console by default.
+		*	Can be defined within cmake options or before including the header.
+		*/
+		#define SA_UTH_DFLT_CSL_LOG 0
+#endif
+
+		/// Dynamic console log toogle.
+		inline bool bCslLog = SA_UTH_DFLT_CSL_LOG;
+
+
+#ifndef SA_UTH_DFLT_FILE_LOG
+		/**
+		*	\brief Wether to log tests in file by default.
+		*	Can be defined within cmake options or before including the header.
+		*/
+		#define SA_UTH_DFLT_FILE_LOG 0
+#endif
+
+		/// Dynamic file log toogle.
+		inline bool bFileLog = SA_UTH_DFLT_FILE_LOG;
+
+		/// \cond Internal
+
+		/// Internal implementation namespace.
+		namespace Intl
+		{
+			class Logger
+			{
+				std::string logFileName;
+
+				Logger();
+				~Logger();
+
+			public:
+				static Logger instance;
+
+				std::fstream logFile;
+			};
+
+
+			/// enum for console colors.
+			enum class CslColor
+			{
+				/// Default color.
+				None,
+
+				/// UTH Color for init.
+				Init,
+
+				/// UTH Color for exit.
+				Exit,
+
+				/// Color used for test's titles.
+				Title,
+
+				/// Color used on test success.
+				Success,
+
+				/// Color used on test failure.
+				Failure,
+
+				/// Color used for group begin.
+				GroupBegin,
+
+				/// Color used for group begin.
+				GroupEnd,
+
+				/// Color used for test number.
+				TestNum,
+
+				/// Color used for param warning.
+				ParamWarning,
+			};
+
+			inline void SetConsoleColor(CslColor _result);
+
+			/**
+			*	\brief Log enabled and should log.
+			* 
+			*	\return log toggle.
+			*/
+			inline bool ShouldLog() noexcept;
+
+			/**
+			*	\brief Indent in-string \n with group tabs.
+			* 
+			*	\param[in] _str		String to indent.
+			* 
+			*	\return	indented string.
+			*/
+			inline std::string IndentStr(std::string _str);
+
+			/// Getter of file name.
+			inline const char* GetFileNameFromPath(const char* _filePath) noexcept;
+		}
+
+
+		/**
+		*	\brief UTH log macro
+		*
+		*	Output with indentation and options bCslLog and bFileLog.
+		*/
+		#define SA_UTH_LOG(_str)\
+		{\
+			using namespace Sa::UTH::Intl;\
+		\
+			Group::LogTabs();\
+			if (bCslLog) std::cout << _str << std::endl;\
+			if (bFileLog) Logger::instance.logFile << _str << std::endl;\
+		}
+
+		/// Output only str as input.
+		#define __SA_UTH_LOG_IN(_str)\
+		{\
+			using namespace Sa::UTH::Intl;\
+		\
+			if (bCslLog) std::cout << _str;\
+			if (bFileLog) Logger::instance.logFile << _str;\
+		}
+
+		/// Ouput only end of line.
+		#define __SA_UTH_LOG_ENDL()\
+		{\
+			using namespace Sa::UTH::Intl;\
+		\
+			if (bCslLog) std::cout << std::endl;\
+			if (bFileLog) Logger::instance.logFile << std::endl;\
+		}
+
+#pragma endregion
+
+
+#pragma region Counter
+
+		struct Counter
+		{
+			/// Counter of success.
+			unsigned int success = 0;
+
+			/// Counter of failure.
+			unsigned int failure = 0;
+
+			/// Total count.
+			unsigned int Total() const;
+
+			/// Update counter from predicate.
+			void Update(bool _pred);
+
+			Counter& operator+=(const Counter& _rhs) noexcept;
+
+			void Log() const;
+
+			bool IsEmpty() const;
+		};
+
+#pragma endregion
+
+
+#pragma region Title
+
+		struct Title
+		{
+			const std::string& funcDecl;
+			const std::string& fileName;
+			unsigned int lineNum = 0u;
+			bool pred = false;
+
+			/// Log test's title in console.
+			inline void Log() const;
+		};
+
+#pragma endregion
+
+
+#pragma region Group
+
+		/// Infos generated from a group of tests.
+		class Group
+		{
+			static std::stack<Group> sGroups;
+
+		public:
+
+			/// Name of the group.
+			const std::string name;
+
+			/**
+			*	\brief Local exit from tests of the group.
+			*
+			*	UTH::localExit will be equal to EXIT_FAILURE (1) if at least one test of the group failed.
+			*
+			*	localExit 0 == success.
+			*	localExit 1 == failure.
+			*/
+			bool localExit = EXIT_SUCCESS;
+
+			/// Counter of test run in this group.
+			Counter count;
+
+			/// Global Group counter.
+			static inline Counter globalCount;
+
+			/**
+			*	\brief Spreads values to parent group.
+			*
+			*	\param[in] _parent	parent to spread values to.
+			*/
+			void Spread(Group& _parent);
+
+			/**
+			*	\brief Update values from predicate.
+			*
+			*	\param[in] _pred	predicate from current test.
+			*/
+			static void Update(bool _pred);
+
+			/// Start a new group of tests.
+			static inline void Begin(const std::string& _name);
+
+			/// End a group of tests.
+			static inline Group End();
+
+
+			/**
+			*	\brief GroupBegin output in console.
+			*
+			*	\param[in] _name	The name of the group that begins.
+			*/
+			static inline void BeginLog(const std::string& _name);
+
+			/**
+			*	\brief GroupEnd output in console.
+			*
+			*	\param[in] _group	The group that ends.
+			*/
+			static inline void EndLog(const UTH::Group& _group);
+
+
+			static inline std::string TabStr() noexcept;
+
+			static inline void LogTabs() noexcept;
+		};
+
+		std::stack<Group> Group::sGroups;
+
+#pragma endregion
+
+
+#pragma region Param
+
 		/// Pair of param name and value.
 		struct Param
 		{
@@ -107,78 +399,16 @@ namespace Sa
 
 			/// Param's value as a string.
 			std::string value;
+
+			/**
+			*	\brief Test parameters output in console.
+			*
+			*	\param[in] _params	Every param infos extracted from call.
+			*/
+			static inline void Log(const std::vector<Param>& _params);
 		};
 
-
-		/// Infos generated from a group of tests.
-		struct Group
-		{
-			/// Name of the group.
-			const std::string name;
-
-			/**
-			*	\brief Local exit from tests of the group.
-			* 
-			*	UTH::localExit will be equal to EXIT_FAILURE (1) if at least one test of the group failed.
-			*
-			*	localExit 0 == success.
-			*	localExit 1 == failure.
-			*/
-			bool localExit = EXIT_SUCCESS;
-
-			/// Number of test run in this group.
-			unsigned int testNum = 0u;
-
-			/**
-			*	\brief Update values from predicate.
-			*
-			*	\param[in] _pred	predicate from current test.
-			*/
-			void Update(bool _pred)
-			{
-				++testNum;
-
-				if (!_pred)
-					localExit = EXIT_FAILURE;
-			}
-
-			/**
-			*	\brief Spreads values to parent group.
-			*
-			*	\param[in] _parent	parent to spread values to.
-			*/
-			void Spread(Group& _parent)
-			{
-				if(localExit == EXIT_FAILURE)
-					_parent.localExit = EXIT_FAILURE;
-
-				_parent.testNum += testNum;
-			}
-		};
-
-
-	#ifndef SA_UTH_DFLT_CSL_LOG
-		/**
-		*	\brief Wether to log tests in console by default.
-		*	Can be defined within cmake options or before including the header.
-		*/
-		#define SA_UTH_DFLT_CSL_LOG 0
-	#endif
-
-		/// Dynamic console log toogle.
-		inline bool bCslLog = SA_UTH_DFLT_CSL_LOG;
-
-
-	#ifndef SA_UTH_DFLT_FILE_LOG
-		/**
-		*	\brief Wether to log tests in file by default.
-		*	Can be defined within cmake options or before including the header.
-		*/
-		#define SA_UTH_DFLT_FILE_LOG 0
-	#endif
-
-		/// Dynamic file log toogle.
-		inline bool bFileLog = SA_UTH_DFLT_FILE_LOG;
+#pragma endregion
 
 
 #pragma region Callback
@@ -202,17 +432,8 @@ namespace Sa
 		/// Callback called on groupe end.
 		inline void (*GroupEndCB)(const Group& _group) = nullptr;
 
-
-		struct TitleInfos
-		{
-			const std::string& funcDecl;
-			const std::string& fileName;
-			unsigned int lineNum = 0u;
-			bool pred = false;
-		};
-
 		/// Callback called on test's title processing.
-		inline void (*TitleCB)(const TitleInfos& _infos) = nullptr;
+		inline void (*TitleCB)(const Title& _infos) = nullptr;
 
 		/// Callback called on test's parameters processing.
 		inline void (*ParamsCB)(const std::vector<Param>& _params) = nullptr;
@@ -223,21 +444,10 @@ namespace Sa
 #pragma endregion
 
 
-		/// \cond Internal
+#pragma region ToString
 
-		/// Internal implementation namespace.
 		namespace Intl
 		{
-			inline std::fstream logFile;
-			inline std::string logFileName;
-
-			/// Number of test run.
-			inline unsigned int testNum = 0u;
-
-			inline std::string GroupTabStr() noexcept;
-			inline void LogGroupTabs() noexcept;
-
-
 			/**
 			*	Compile time check type T has member ToString using SFINAE.
 			* 
@@ -280,465 +490,6 @@ namespace Sa
 			};
 		}
 
-		/// \endcond
-
-#pragma endregion
-
-
-#pragma region Log
-
-		/**
-		*	\brief UTH log macro
-		*
-		*	Output with indentation and options bCslLog and bFileLog.
-		*/
-		#define SA_UTH_LOG(_str)\
-		{\
-			using namespace Sa::UTH::Intl;\
-		\
-			LogGroupTabs();\
-			if (bCslLog) std::cout << _str << std::endl;\
-			if (bFileLog) logFile << _str << std::endl;\
-		}
-
-		/// Output only str as input.
-		#define __SA_UTH_LOG_IN(_str)\
-		{\
-			using namespace Sa::UTH::Intl;\
-		\
-			if (bCslLog) std::cout << _str;\
-			if (bFileLog) logFile << _str;\
-		}
-
-		/// Ouput only end of line.
-		#define __SA_UTH_LOG_ENDL()\
-		{\
-			using namespace Sa::UTH::Intl;\
-		\
-			if (bCslLog) std::cout << std::endl;\
-			if (bFileLog) logFile << std::endl;\
-		}
-
-
-		/// \cond Internal
-
-		namespace Intl
-		{
-			/// enum for console colors.
-			enum class CslColor
-			{
-				/// Default color.
-				None,
-
-				/// UTH Color for init.
-				Init,
-
-				/// UTH Color for exit.
-				Exit,
-
-				/// Color used for test's titles.
-				Title,
-
-				/// Color used on test success.
-				Success,
-
-				/// Color used on test failure.
-				Failure,
-
-				/// Color used for group begin.
-				GroupBegin,
-
-				/// Color used for group begin.
-				GroupEnd,
-
-				/// Color used for test number.
-				TestNum,
-
-				/// Color used for param warning.
-				ParamWarning,
-			};
-
-		#if _WIN32
-			inline HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-			inline void SetConsoleColor(CslColor _result)
-			{
-				switch (_result)
-				{
-					case CslColor::None:
-						SetConsoleTextAttribute(hConsole, 15);
-						break;
-					case CslColor::Title:
-						SetConsoleTextAttribute(hConsole, 14);
-						break;
-					case CslColor::Success:
-						SetConsoleTextAttribute(hConsole, 10);
-						break;
-					case CslColor::Failure:
-						SetConsoleTextAttribute(hConsole, 12);
-						break;
-					case CslColor::TestNum:
-						SetConsoleTextAttribute(hConsole, 6);
-						break;
-					case CslColor::GroupBegin:
-						SetConsoleTextAttribute(hConsole, 3);
-						break;
-					case CslColor::GroupEnd:
-						SetConsoleTextAttribute(hConsole, 3);
-						break;
-					case CslColor::Init:
-						SetConsoleTextAttribute(hConsole, 13);
-						break;
-					case CslColor::Exit:
-						SetConsoleTextAttribute(hConsole, 13);
-						break;
-					case CslColor::ParamWarning:
-						SetConsoleTextAttribute(hConsole, 6);
-						break;
-					default:
-						SA_UTH_LOG("CslColor not supported yet!");
-						break;
-				}
-			}
-		#else
-			inline void SetConsoleColor(CslColor _result)
-			{
-				(void)_result;
-			}
-		#endif
-
-			/**
-			*	\brief Open the output log file.
-			*
-			*	\param[in] _time	Time used to name the log file.
-			*/
-			inline void OpenLogFile(time_t _time)
-			{
-				std::filesystem::create_directories("Logs");
-
-				struct tm timeinfo;
-				localtime_s(&timeinfo, &_time);
-
-				/**
-				*	log_backup-<month>.<day>.<year>-<hour>h<minute>m<second>s.txt
-				*	Ex: 2/27/2021 at 12:07:43
-				*	log_backup-2.27.2021-12h07m43s.txt
-				*/
-				logFileName = std::string("Logs/log_UTH-") +
-					std::to_string(timeinfo.tm_mon + 1) + '.' +
-					std::to_string(timeinfo.tm_mday) + '.' +
-					std::to_string(timeinfo.tm_year + 1900) + '-' +
-					std::to_string(timeinfo.tm_hour) + 'h' +
-					std::to_string(timeinfo.tm_min) + 'm' +
-					std::to_string(timeinfo.tm_sec) + 's' +
-					".txt";
-
-				logFile.open(logFileName, std::ios::out | std::ios::app);
-			}
-
-			/**
-			*	\brief Close the log file.
-			* 
-			*	Delete file if empty.
-			*/
-			inline void CloseLogFile()
-			{
-				logFile.close();
-
-				// Delete if empty file.
-				if(std::filesystem::is_empty(logFileName))
-					std::filesystem::remove(logFileName);
-			}
-
-
-			/**
-			*	\brief Log enabled and should log.
-			* 
-			*	\return log toggle.
-			*/
-			inline bool ShouldLog() noexcept
-			{
-				return bCslLog || bFileLog;
-			}
-
-			/**
-			*	\brief Indent in-string \n with group tabs.
-			* 
-			*	\param[in] _str		String to indent.
-			* 
-			*	\return	indented string.
-			*/
-			inline std::string IndentStr(std::string _str)
-			{
-				const std::string indentStr = std::string("\n") + GroupTabStr();
-
-				size_t index = _str.find('\n');
-
-				while (index != std::string::npos)
-				{
-					_str.replace(index, 1, indentStr);
-
-					index = _str.find('\n', index + indentStr.size());
-				}
-
-				return _str;
-			}
-
-
-			/**
-			*	\brief GroupBegin output in console.
-			*
-			*	\param[in] _name	The name of the group that begins.
-			*/
-			inline void GroupBeginLog(const std::string& _name)
-			{
-				SetConsoleColor(CslColor::GroupBegin);
-				SA_UTH_LOG("[SA-UTH] Group:\t" << _name);
-				SetConsoleColor(CslColor::None);
-			}
-
-			/**
-			*	\brief GroupEnd output in console.
-			*
-			*	\param[in] _group	The group that ends.
-			*/
-			inline void GroupEndLog(const struct UTH::Group& _group)
-			{
-				LogGroupTabs();
-				SetConsoleColor(CslColor::GroupEnd);
-
-				__SA_UTH_LOG_IN("[SA-UTH] Group:\t" << _group.name << " run: ");
-
-				SetConsoleColor(CslColor::TestNum);
-				__SA_UTH_LOG_IN(_group.testNum);
-
-				SetConsoleColor(CslColor::GroupEnd);
-				__SA_UTH_LOG_IN(" and exit with code: ");
-
-				if (_group.localExit == EXIT_SUCCESS)
-				{
-					SetConsoleColor(CslColor::Success);
-					__SA_UTH_LOG_IN("EXIT_SUCCESS (" << EXIT_SUCCESS << ')');
-				}
-				else
-				{
-					SetConsoleColor(CslColor::Failure);
-					__SA_UTH_LOG_IN("EXIT_FAILURE (" << EXIT_FAILURE << ')');
-				}
-
-				__SA_UTH_LOG_ENDL();
-				SetConsoleColor(CslColor::None);
-			}
-
-
-			/**
-			*	\brief Test title output in console.
-			*
-			*	\param[in] _funcDecl	Declaration of the function as a string.
-			*	\param[in] _lineNum		Line number of the function's call.
-			*	\param[in] _pred		Result of the test.
-			*/
-			inline void TitleLog(const TitleInfos& _infos)
-			{
-				SetConsoleColor(CslColor::Title);
-
-				LogGroupTabs();
-				__SA_UTH_LOG_IN("[SA-UTH] ");
-
-				// Result.
-				if (_infos.pred)
-				{
-					SetConsoleColor(CslColor::Success);
-					__SA_UTH_LOG_IN("Success ");
-				}
-				else
-				{
-					SetConsoleColor(CslColor::Failure);
-					__SA_UTH_LOG_IN("Failure ");
-				}
-
-				SetConsoleColor(CslColor::Title);
-
-				__SA_UTH_LOG_IN(_infos.funcDecl << " -- " << _infos.fileName << ":" << _infos.lineNum << std::endl);
-
-				SetConsoleColor(CslColor::None);
-			}
-
-			/**
-			*	\brief Test parameters output in console.
-			*
-			*	\param[in] _params	Every param infos extracted from call.
-			*/
-			inline void ParamsLog(const std::vector<Param>& _params)
-			{
-				for (auto it = _params.begin(); it != _params.end(); ++it)
-				{
-					if(verbosity & Verbosity::ParamsName)
-						SA_UTH_LOG(it->name << ':');
-
-					// ToString not implemented.
-					if (it->value.empty())
-					{
-						__SA_UTH_LOG_IN("-No debug string-\t");
-						SetConsoleColor(CslColor::ParamWarning);
-						__SA_UTH_LOG_IN("Implement ToString() in class or UTH::ToString template specialization.");
-						SetConsoleColor(CslColor::None);
-					}
-					else
-						SA_UTH_LOG(IndentStr(it->value));
-				}
-			}
-		}
-
-		/// \endcond
-
-#pragma endregion
-
-
-#pragma region Init / Exit
-
-		/**
-		*	\brief Init function to be called at the start of main.
-		*	Use SA_UTH_INIT() as helper macro.
-		*/
-		inline void Init()
-		{
-			using namespace Intl;
-
-			time_t currTime = time(NULL);
-
-
-			OpenLogFile(currTime);
-
-
-			SetConsoleColor(CslColor::Init);
-
-			// Init rand.
-			srand(static_cast<unsigned int>(currTime));
-			SA_UTH_LOG("[SA-UTH] Init Rand seed: " << currTime);
-			
-			SetConsoleColor(CslColor::None);
-		}
-
-		/**
-		*	\brief Helper init program macro.
-		*	Should be used at the start of main.
-		*/
-		#define SA_UTH_INIT() Sa::UTH::Init();
-
-
-		/**
-		*	\brief Exit function to be called at the end of main.
-		*	Use SA_UTH_EXIT() as helper macro.
-		* 
-		*	\return exit code of all tests run.
-		*/
-		inline int Exit()
-		{
-			using namespace Intl;
-
-			// Reset to default.
-			bCslLog = SA_UTH_DFLT_CSL_LOG;
-			bFileLog = SA_UTH_DFLT_FILE_LOG;
-
-			SetConsoleColor(CslColor::Exit);
-			__SA_UTH_LOG_IN("[SA-UTH] Run: ");
-
-			SetConsoleColor(CslColor::TestNum);
-			__SA_UTH_LOG_IN(testNum);
-
-			SetConsoleColor(CslColor::Exit);
-			__SA_UTH_LOG_IN(" and exit with code: ");
-
-			if (exit == EXIT_SUCCESS)
-			{
-				SetConsoleColor(CslColor::Success);
-				__SA_UTH_LOG_IN("EXIT_SUCCESS (" << EXIT_SUCCESS << ')');
-			}
-			else
-			{
-				SetConsoleColor(CslColor::Failure);
-				__SA_UTH_LOG_IN("EXIT_FAILURE (" << EXIT_FAILURE << ')');
-			}
-
-			__SA_UTH_LOG_ENDL();
-			SetConsoleColor(CslColor::None);
-			
-
-			CloseLogFile();
-
-
-			return exit;
-		}
-
-		/**
-		*	\brief Helper exit program macro.
-		*	Should be used at the end of main.
-		*/
-		#define SA_UTH_EXIT() return Sa::UTH::Exit();
-
-#pragma endregion
-
-
-#pragma region Group
-
-		/// \cond Internal
-
-		namespace Intl
-		{
-			inline std::stack<Group> groups;
-
-			inline std::string GroupTabStr() noexcept
-			{
-				return std::string(groups.size(), '\t');
-			}
-
-			inline void LogGroupTabs() noexcept
-			{
-				if(groups.size())
-					__SA_UTH_LOG_IN(GroupTabStr());
-			}
-
-			/// Start a new group of tests.
-			inline void GroupBegin(const std::string& _name)
-			{
-				// Log before push for log indentation.
-				if ((verbosity & Verbosity::GroupStart) && ShouldLog())
-					GroupBeginLog(_name);
-
-				groups.push(Group{ _name });
-
-				if (GroupBeginCB)
-					GroupBeginCB(_name);
-			}
-
-			/// End a group of tests.
-			inline Group GroupEnd()
-			{
-				Group group = groups.top();
-				groups.pop();
-
-				// Spread values to parent.
-				if (!groups.empty())
-					group.Spread(groups.top());
-
-				if ((verbosity & Verbosity::GroupExit) && ShouldLog())
-					GroupEndLog(group);
-
-				if (GroupEndCB)
-					GroupEndCB(group);
-
-				return group;
-			}
-		}
-
-		/// \endcond Internal
-
-#pragma endregion
-
-
-#pragma region ToString
-
 		/**
 		*	\brief ToString implementation used to print elem during unit testing.
 		*
@@ -768,7 +519,6 @@ namespace Sa
 #endif
 			}
 		}
-
 
 		/**
 		*	\brief ToString implementation used to print tab of elems during unit testing.
@@ -808,7 +558,7 @@ namespace Sa
 		*
 		*	\param[in] _lhs		Left hand side operand to compare.
 		*	\param[in] _rhs		Right hand side operand to compare.
-		* 
+		*
 		*	\return	True on equality, otherwise false.
 		*/
 		template <typename T>
@@ -825,7 +575,7 @@ namespace Sa
 		*	\param[in] _lhs		Left hand side operand to compare.
 		*	\param[in] _rhs		Right hand side operand to compare.
 		*	\param[in] _epsilon	Epsilon value for threshold compare.
-		* 
+		*
 		*	\return	True on equality, otherwise false.
 		*/
 		template <typename T>
@@ -842,7 +592,7 @@ namespace Sa
 		*	\param[in] _lhs		Left hand side operand to compare.
 		*	\param[in] _rhs		Right hand side operand to compare.
 		*	\param[in] _size	Size of tabs to compare compare.
-		* 
+		*
 		*	\return	True on equality, otherwise false.
 		*/
 		template <typename T>
@@ -866,7 +616,7 @@ namespace Sa
 		*	\param[in] _rhs		Right hand side operand to compare.
 		*	\param[in] _size	Size of tabs to compare compare.
 		*	\param[in] _epsilon	Epsilon value for threshold compare.
-		* 
+		*
 		*	\return	True on equality, otherwise false.
 		*/
 		template <typename T>
@@ -888,22 +638,22 @@ namespace Sa
 
 		/**
 		*	\brief Rand between [min, max[ (max excluded).
-		* 
+		*
 		*	\tparam T			Type of the rand.
 		*	\param[in] _min		Min bound for rand (included).
 		*	\param[in] _max		Max bound for rand (excluded).
-		* 
+		*
 		*	\return Random T between [min, max[ (max excluded).
 		*/
 		template <typename T>
 		T Rand(T _min = T(0), T _max = T(1))
 		{
-			return _min + static_cast<T>(rand()) / static_cast<T>(RAND_MAX/(_max - _min));
+			return _min + static_cast<T>(rand()) / static_cast<T>(RAND_MAX / (_max - _min));
 		}
 
 		/**
 		*	\brief Rand specialization for bool.
-		* 
+		*
 		*	\param[in] _min		Min bound (false) (included).
 		*	\param[in] _max		Max bound (true) (included).
 		*
@@ -921,91 +671,239 @@ namespace Sa
 
 		namespace Intl
 		{
-			/// Update UTH module from predicate.
-			inline void Update(bool _pred)
-			{
-				++testNum;
+			/// Total number of test run.
+			Counter globalCount;
 
-				if (!groups.empty())
-					groups.top().Update(_pred);
-			}
+			/// Update UTH module from predicate.
+			inline void Update(bool _pred);
 			
 
 			/// Compute title from function declaration and line num.
-			inline void ComputeTitle(const TitleInfos& _infos)
-			{
-				if(ShouldLog())
-					TitleLog(_infos);
-
-				if (TitleCB)
-					TitleCB(_infos);
-			}
+			inline void ComputeTitle(const Title& _infos);
 
 
 			/// Compute params.
 			template <typename... Args>
-			void ComputeParam(bool _pred, std::string _paramNames, const Args&... _args)
-			{
-				// No need to compute params.
-				if (!ShouldLog() && !ParamsCB)
-					return;
-
-				if ((_pred && (verbosity & ParamsSuccess)) ||		// Should output params on success.
-					(!_pred && (verbosity & ParamsFailure)))		// Should output params on failure.
-				{
-					std::vector<Param> params;
-					GenerateParamStr(params, _paramNames, _args...);
-
-					ParamsLog(params);
-
-					if (ParamsCB)
-						ParamsCB(params);
-				}
-			}
+			void ComputeParam(bool _pred, std::string _paramNames, const Args&... _args);
 
 			/// \brief Generate Params from params' names and values.
 			template <typename FirstT, typename... Args>
-			void GenerateParamStr(std::vector<Param>& _result, std::string _paramNames, const FirstT& _first, const Args&... _args)
-			{
-				size_t index = _paramNames.find_first_of(',');
-
-				_result.push_back(Param{ _paramNames.substr(0u, index), Sa::UTH::ToString(_first) });
-
-				if constexpr (sizeof...(_args) != 0)
-					GenerateParamStr(_result, _paramNames.substr(index + 2), _args...);
-			}
+			void GenerateParamStr(std::vector<Param>& _result, std::string _paramNames, const FirstT& _first, const Args&... _args);
 
 
 			/// Compute the result using _pred predicate.
-			inline void ComputeResult(bool _pred)
-			{
-				if (!_pred)
-					Sa::UTH::exit = EXIT_FAILURE;
-
-				if (ResultCB)
-					ResultCB(_pred);
-
-#if SA_UTH_EXIT_ON_FAILURE
-				if (!_pred)
-					::exit(EXIT_FAILURE);
-#endif
-			}
+			inline void ComputeResult(bool _pred);
 
 			/// Wether to continue computing test with predicate _pred.
-			inline bool ShouldComputeTest(bool _pred)
-			{
-				return !_pred || (verbosity & Verbosity::Success);
-			}
+			inline bool ShouldComputeTest(bool _pred);
 
 			/// \brief Helper function for size of VA_ARGS (handle empty args).
 			template <typename... Args>
-			unsigned int SizeOfArgs(const Args&...)
+			unsigned int SizeOfArgs(const Args&...);
+		}
+
+		/// \endcond
+
+#pragma endregion
+
+
+#pragma endregion
+
+
+#pragma region Cpp
+
+		/// \cond
+
+#pragma region Init / Exit
+
+		namespace Intl
+		{
+			void Init()
 			{
-				return sizeof...(Args);
+				using namespace Intl;
+
+				SetConsoleColor(CslColor::Init);
+
+				// Init rand.
+				time_t currTime = time(NULL);
+				srand(static_cast<unsigned int>(currTime));
+				SA_UTH_LOG("[SA-UTH] Init Rand seed: " << currTime);
+
+				SetConsoleColor(CslColor::None);
+			}
+
+			int Exit()
+			{
+				using namespace Intl;
+
+				// Reset to default.
+				bCslLog = SA_UTH_DFLT_CSL_LOG;
+				bFileLog = SA_UTH_DFLT_FILE_LOG;
+
+				SetConsoleColor(CslColor::Exit);
+				__SA_UTH_LOG_IN("[SA-UTH] Run: ");
+
+
+				Intl::globalCount.Log();
+
+				// Output Group counter.
+				if ((verbosity & Verbosity::GroupCount) && !Group::globalCount.IsEmpty())
+				{
+					SetConsoleColor(CslColor::Exit);
+					__SA_UTH_LOG_IN(" in ");
+
+					Group::globalCount.Log();
+
+					SetConsoleColor(CslColor::GroupEnd);
+					__SA_UTH_LOG_IN(" groups");
+				}
+
+
+				// Output exit.
+				SetConsoleColor(CslColor::Exit);
+				__SA_UTH_LOG_IN(" and exit with code: ");
+
+				if (exit == EXIT_SUCCESS)
+				{
+					SetConsoleColor(CslColor::Success);
+					__SA_UTH_LOG_IN("EXIT_SUCCESS (" << EXIT_SUCCESS << ')');
+				}
+				else
+				{
+					SetConsoleColor(CslColor::Failure);
+					__SA_UTH_LOG_IN("EXIT_FAILURE (" << EXIT_FAILURE << ')');
+				}
+
+				__SA_UTH_LOG_ENDL();
+				SetConsoleColor(CslColor::None);
+
+				return exit;
+			}
+		}
+
+#pragma endregion
+
+
+#pragma region Logger
+
+		namespace Intl
+		{
+			Logger Logger::instance;
+
+			Logger::Logger()
+			{
+				time_t currTime = time(NULL);
+
+				// Open Log file.
+				{
+					std::filesystem::create_directories("Logs");
+
+					struct tm timeinfo;
+					localtime_s(&timeinfo, &currTime);
+
+					/**
+					*	log_UTH-<month>.<day>.<year>-<hour>h<minute>m<second>s.txt
+					*	Ex: 2/27/2021 at 12:07:43
+					*	log_UTH-2.27.2021-12h07m43s.txt
+					*/
+					logFileName = std::string("Logs/log_UTH-") +
+						std::to_string(timeinfo.tm_mon + 1) + '.' +
+						std::to_string(timeinfo.tm_mday) + '.' +
+						std::to_string(timeinfo.tm_year + 1900) + '-' +
+						std::to_string(timeinfo.tm_hour) + 'h' +
+						std::to_string(timeinfo.tm_min) + 'm' +
+						std::to_string(timeinfo.tm_sec) + 's' +
+						".txt";
+
+					logFile.open(logFileName, std::ios::out | std::ios::app);
+				}
+			}
+
+			Logger::~Logger()
+			{
+				// Close log file.
+				{
+					logFile.close();
+
+					// Delete if empty file.
+					if (std::filesystem::is_empty(logFileName))
+						std::filesystem::remove(logFileName);
+				}
+			}
+
+
+#if _WIN32
+			void SetConsoleColor(CslColor _result)
+			{
+				static HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+				switch (_result)
+				{
+					case CslColor::None:
+						SetConsoleTextAttribute(hConsole, 15);
+						break;
+					case CslColor::Title:
+						SetConsoleTextAttribute(hConsole, 14);
+						break;
+					case CslColor::Success:
+						SetConsoleTextAttribute(hConsole, 10);
+						break;
+					case CslColor::Failure:
+						SetConsoleTextAttribute(hConsole, 12);
+						break;
+					case CslColor::TestNum:
+						SetConsoleTextAttribute(hConsole, 6);
+						break;
+					case CslColor::GroupBegin:
+						SetConsoleTextAttribute(hConsole, 3);
+						break;
+					case CslColor::GroupEnd:
+						SetConsoleTextAttribute(hConsole, 3);
+						break;
+					case CslColor::Init:
+						SetConsoleTextAttribute(hConsole, 13);
+						break;
+					case CslColor::Exit:
+						SetConsoleTextAttribute(hConsole, 13);
+						break;
+					case CslColor::ParamWarning:
+						SetConsoleTextAttribute(hConsole, 6);
+						break;
+					default:
+						SA_UTH_LOG("CslColor not supported yet!");
+						break;
+				}
+			}
+#else
+			void SetConsoleColor(CslColor _result)
+			{
+				(void)_result;
+			}
+#endif
+
+			bool ShouldLog() noexcept
+			{
+				return bCslLog || bFileLog;
+			}
+
+			std::string IndentStr(std::string _str)
+			{
+				const std::string indentStr = std::string("\n") + Group::TabStr();
+
+				size_t index = _str.find('\n');
+
+				while (index != std::string::npos)
+				{
+					_str.replace(index, 1, indentStr);
+
+					index = _str.find('\n', index + indentStr.size());
+				}
+
+				return _str;
 			}
 
 			/// Getter of file name.
-			inline const char* GetFileNameFromPath(const char* _filePath) noexcept
+			const char* GetFileNameFromPath(const char* _filePath) noexcept
 			{
 				// Remove characters until last backslash.
 				const char* fileName = strrchr(_filePath, '\\');
@@ -1027,6 +925,317 @@ namespace Sa
 			}
 		}
 
+#pragma endregion
+
+
+#pragma region Counter
+
+		unsigned int Counter::Total() const
+		{
+			return success + failure;
+		}
+
+		void Counter::Update(bool _pred)
+		{
+			if (_pred)
+				++success;
+			else
+				++failure;
+		}
+
+		Counter& Counter::operator+=(const Counter& _rhs) noexcept
+		{
+			success += _rhs.success;
+			failure += _rhs.failure;
+
+			return *this;
+		}
+
+		void Counter::Log() const
+		{
+			using namespace Intl;
+
+			SetConsoleColor(CslColor::TestNum);
+			__SA_UTH_LOG_IN(Total());
+
+			if (failure)
+			{
+				__SA_UTH_LOG_IN(" (");
+
+				SetConsoleColor(CslColor::Success);
+				__SA_UTH_LOG_IN(success);
+
+				SetConsoleColor(CslColor::TestNum);
+				__SA_UTH_LOG_IN('/');
+
+				SetConsoleColor(CslColor::Failure);
+				__SA_UTH_LOG_IN(failure);
+
+				SetConsoleColor(CslColor::TestNum);
+				__SA_UTH_LOG_IN(')');
+			}
+		}
+
+		bool Counter::IsEmpty() const
+		{
+			return success != 0 && failure != 0;
+		}
+
+#pragma endregion
+
+
+#pragma region Title
+
+		void Title::Log() const
+		{
+			using namespace Intl;
+
+			SetConsoleColor(CslColor::Title);
+
+			Group::LogTabs();
+			__SA_UTH_LOG_IN("[SA-UTH] ");
+
+			// Result.
+			if (pred)
+			{
+				SetConsoleColor(CslColor::Success);
+				__SA_UTH_LOG_IN("Success ");
+			}
+			else
+			{
+				SetConsoleColor(CslColor::Failure);
+				__SA_UTH_LOG_IN("Failure ");
+			}
+
+			SetConsoleColor(CslColor::Title);
+
+			__SA_UTH_LOG_IN(funcDecl << " -- " << fileName << ":" << lineNum << std::endl);
+
+			SetConsoleColor(CslColor::None);
+		}
+
+#pragma endregion
+
+
+#pragma region Group
+
+		void Group::Update(bool _pred)
+		{
+			// Update top group.
+			if (!Group::sGroups.empty())
+			{
+				Group& gp = Group::sGroups.top();
+
+
+				gp.count.Update(_pred);
+
+				if (!_pred)
+					gp.localExit = EXIT_FAILURE;
+			}
+		}
+
+		void Group::Spread(Group& _parent)
+		{
+			if (localExit == EXIT_FAILURE)
+				_parent.localExit = EXIT_FAILURE;
+
+			_parent.count += count;
+		}
+
+		void Group::Begin(const std::string& _name)
+		{
+			// Log before push for log indentation.
+			if ((verbosity & Verbosity::GroupStart) && Intl::ShouldLog())
+				BeginLog(_name);
+
+			sGroups.push(Group{ _name });
+
+			if (GroupBeginCB)
+				GroupBeginCB(_name);
+		}
+
+		Group Group::End()
+		{
+			Group group = sGroups.top();
+			sGroups.pop();
+
+			// Spread values to parent.
+			if (!sGroups.empty())
+				group.Spread(sGroups.top());
+
+			if ((verbosity & Verbosity::GroupExit) && Intl::ShouldLog())
+				EndLog(group);
+
+			if (GroupEndCB)
+				GroupEndCB(group);
+
+			globalCount.Update(group.localExit == EXIT_SUCCESS);
+
+			return group;
+		}
+
+
+		void Group::BeginLog(const std::string& _name)
+		{
+			using namespace Intl;
+
+			SetConsoleColor(CslColor::GroupBegin);
+			SA_UTH_LOG("[SA-UTH] Group:\t" << _name);
+			SetConsoleColor(CslColor::None);
+		}
+
+		void Group::EndLog(const UTH::Group& _group)
+		{
+			using namespace Intl;
+
+			LogTabs();
+			SetConsoleColor(CslColor::GroupEnd);
+
+			__SA_UTH_LOG_IN("[SA-UTH] Group:\t" << _group.name << " run: ");
+
+			_group.count.Log();
+
+			SetConsoleColor(CslColor::GroupEnd);
+			__SA_UTH_LOG_IN(" and exit with code: ");
+
+			if (_group.localExit == EXIT_SUCCESS)
+			{
+				SetConsoleColor(CslColor::Success);
+				__SA_UTH_LOG_IN("EXIT_SUCCESS (" << EXIT_SUCCESS << ')');
+			}
+			else
+			{
+				SetConsoleColor(CslColor::Failure);
+				__SA_UTH_LOG_IN("EXIT_FAILURE (" << EXIT_FAILURE << ')');
+			}
+
+			__SA_UTH_LOG_ENDL();
+			SetConsoleColor(CslColor::None);
+		}
+
+
+		std::string Group::TabStr() noexcept
+		{
+			return std::string(sGroups.size(), '\t');
+		}
+
+		void Group::LogTabs() noexcept
+		{
+			if (sGroups.size())
+				__SA_UTH_LOG_IN(TabStr());
+		}
+
+#pragma endregion
+
+
+#pragma region Param
+
+		void Param::Log(const std::vector<Param>& _params)
+		{
+			using namespace Intl;
+
+			for (auto it = _params.begin(); it != _params.end(); ++it)
+			{
+				if (verbosity & Verbosity::ParamsName)
+					SA_UTH_LOG(it->name << ':');
+
+				// ToString not implemented.
+				if (it->value.empty())
+				{
+					__SA_UTH_LOG_IN("-No debug string-\t");
+					SetConsoleColor(CslColor::ParamWarning);
+					__SA_UTH_LOG_IN("Implement ToString() in class or UTH::ToString template specialization.");
+					SetConsoleColor(CslColor::None);
+				}
+				else
+					SA_UTH_LOG(IndentStr(it->value));
+			}
+		}
+
+#pragma endregion
+
+
+#pragma region Compute
+
+		namespace Intl
+		{
+			void Update(bool _pred)
+			{
+				globalCount.Update(_pred);
+
+				Group::Update(_pred);
+			}
+			
+			void ComputeTitle(const Title& _infos)
+			{
+				if(ShouldLog())
+					_infos.Log();
+
+				if (TitleCB)
+					TitleCB(_infos);
+			}
+
+
+			template <typename... Args>
+			void ComputeParam(bool _pred, std::string _paramNames, const Args&... _args)
+			{
+				// No need to compute params.
+				if (!ShouldLog() && !ParamsCB)
+					return;
+
+				if ((_pred && (verbosity & ParamsSuccess)) ||		// Should output params on success.
+					(!_pred && (verbosity & ParamsFailure)))		// Should output params on failure.
+				{
+					std::vector<Param> params;
+					GenerateParamStr(params, _paramNames, _args...);
+
+					Param::Log(params);
+
+					if (ParamsCB)
+						ParamsCB(params);
+				}
+			}
+
+			template <typename FirstT, typename... Args>
+			void GenerateParamStr(std::vector<Param>& _result, std::string _paramNames, const FirstT& _first, const Args&... _args)
+			{
+				size_t index = _paramNames.find_first_of(',');
+
+				_result.push_back(Param{ _paramNames.substr(0u, index), Sa::UTH::ToString(_first) });
+
+				if constexpr (sizeof...(_args) != 0)
+					GenerateParamStr(_result, _paramNames.substr(index + 2), _args...);
+			}
+
+
+			void ComputeResult(bool _pred)
+			{
+				if (!_pred)
+					Sa::UTH::exit = EXIT_FAILURE;
+
+				if (ResultCB)
+					ResultCB(_pred);
+
+#if SA_UTH_EXIT_ON_FAILURE
+				if (!_pred)
+					::exit(EXIT_FAILURE);
+#endif
+			}
+
+			inline bool ShouldComputeTest(bool _pred)
+			{
+				return !_pred || (verbosity & Verbosity::Success);
+			}
+
+			template <typename... Args>
+			unsigned int SizeOfArgs(const Args&...)
+			{
+				return sizeof...(Args);
+			}
+		}
+
+#pragma endregion
+
 		/// \endcond
 
 #pragma endregion
@@ -1037,7 +1246,7 @@ namespace Sa
 		/// \cond Internal
 
 		/// Helper macro for file name.
-		#define __SA_UTH_FILE_NAME GetFileNameFromPath(__FILE__)
+		#define __SA_UTH_FILE_NAME Intl::GetFileNameFromPath(__FILE__)
 
 		/// \endcond
 
@@ -1059,14 +1268,14 @@ namespace Sa
 			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
-			bool bRes = UTH::Equals(_lhs, _rhs, __VA_ARGS__);\
+			bool bRes = Equals(_lhs, _rhs, __VA_ARGS__);\
 			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
 				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + (SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
 			\
-				ComputeTitle(TitleInfos{ titleStr, __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				ComputeTitle(Title{ titleStr, __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -1090,7 +1299,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(TitleInfos{ #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				ComputeTitle(Title{ #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #__VA_ARGS__, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -1115,7 +1324,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(TitleInfos{ #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				ComputeTitle(Title{ #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #__VA_ARGS__ ", " #_func "(), " #_res, __VA_ARGS__, result, _res);\
 				ComputeResult(bRes);\
 			}\
@@ -1140,7 +1349,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(TitleInfos{ #_caller "." #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				ComputeTitle(Title{ #_caller "." #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #_caller ", " #__VA_ARGS__, _caller, __VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
@@ -1166,7 +1375,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(TitleInfos{ #_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				ComputeTitle(Title{ #_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #_caller ", " #__VA_ARGS__ ", " #_caller "." #_func "(), " #_res, _caller, __VA_ARGS__, result, _res);\
 				ComputeResult(bRes);\
 			}\
@@ -1192,7 +1401,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(TitleInfos{ #_lhs " " #_op " " #_rhs, __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				ComputeTitle(Title{ #_lhs " " #_op " " #_rhs, __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #_lhs ", " #_rhs, _lhs, _rhs);\
 				ComputeResult(bRes);\
 			}\
@@ -1219,7 +1428,7 @@ namespace Sa
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(TitleInfos{ #_lhs " " #_op " " #_rhs " == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				ComputeTitle(Title{ #_lhs " " #_op " " #_rhs " == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
 				ComputeParam(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, _lhs, _rhs, result, _res);\
 				ComputeResult(bRes);\
 			}\
@@ -1231,12 +1440,12 @@ namespace Sa
 		* 
 		*	\param[in] _name	Name of the group.
 		*/
-		#define SA_UTH_GPB(_name) Sa::UTH::Intl::GroupBegin(#_name);
+		#define SA_UTH_GPB(_name) Sa::UTH::Group::Begin(#_name);
 
 		/**
 		*	\brief End current group.
 		*/
-		#define SA_UTH_GPE() Sa::UTH::Intl::GroupEnd();
+		#define SA_UTH_GPE() Sa::UTH::Group::End();
 
 
 		/**

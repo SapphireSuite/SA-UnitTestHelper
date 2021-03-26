@@ -19,7 +19,7 @@ void GroupEndCB(const UTH::Group& _group)
 	LOG("Group of test [" << _group.name << "] exit with code: " << _group.localExit);
 }
 
-void TitleCB(const UTH::TitleInfos& _infos)
+void TitleCB(const UTH::Title& _infos)
 {
 	LOG("Test: " << _infos.pred << "\t" << _infos.funcDecl << " in file: " << _infos.fileName << " at line:" << _infos.lineNum << '\n');
 }
