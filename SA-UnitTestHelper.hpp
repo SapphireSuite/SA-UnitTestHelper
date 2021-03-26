@@ -171,14 +171,16 @@ namespace Sa
 			{
 				std::string logFileName;
 
-				Logger();
-				~Logger();
+				inline Logger();
+				inline ~Logger();
 
 			public:
 				static Logger instance;
 
 				std::fstream logFile;
 			};
+
+			inline Logger Logger::instance;
 
 
 			/// enum for console colors.
@@ -284,16 +286,16 @@ namespace Sa
 			unsigned int failure = 0;
 
 			/// Total count.
-			unsigned int Total() const;
+			inline unsigned int Total() const;
 
 			/// Update counter from predicate.
-			void Update(bool _pred);
+			inline void Update(bool _pred);
 
-			Counter& operator+=(const Counter& _rhs) noexcept;
+			inline Counter& operator+=(const Counter& _rhs) noexcept;
 
-			void Log() const;
+			inline void Log() const;
 
-			bool IsEmpty() const;
+			inline bool IsEmpty() const;
 		};
 
 #pragma endregion
@@ -348,14 +350,14 @@ namespace Sa
 			*
 			*	\param[in] _parent	parent to spread values to.
 			*/
-			void Spread(Group& _parent);
+			inline void Spread(Group& _parent);
 
 			/**
 			*	\brief Update values from predicate.
 			*
 			*	\param[in] _pred	predicate from current test.
 			*/
-			static void Update(bool _pred);
+			static inline void Update(bool _pred);
 
 			/// Start a new group of tests.
 			static inline void Begin(const std::string& _name);
@@ -384,7 +386,7 @@ namespace Sa
 			static inline void LogTabs() noexcept;
 		};
 
-		std::stack<Group> Group::sGroups;
+		inline std::stack<Group> Group::sGroups;
 
 #pragma endregion
 
@@ -672,7 +674,7 @@ namespace Sa
 		namespace Intl
 		{
 			/// Total number of test run.
-			Counter globalCount;
+			inline Counter globalCount;
 
 			/// Update UTH module from predicate.
 			inline void Update(bool _pred);
@@ -788,8 +790,6 @@ namespace Sa
 
 		namespace Intl
 		{
-			Logger Logger::instance;
-
 			Logger::Logger()
 			{
 				time_t currTime = time(NULL);
@@ -1246,7 +1246,7 @@ namespace Sa
 		/// \cond Internal
 
 		/// Helper macro for file name.
-		#define __SA_UTH_FILE_NAME Intl::GetFileNameFromPath(__FILE__)
+		#define __SA_UTH_FILE_NAME Sa::UTH::Intl::GetFileNameFromPath(__FILE__)
 
 		/// \endcond
 
@@ -1268,7 +1268,7 @@ namespace Sa
 			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
-			bool bRes = Equals(_lhs, _rhs, __VA_ARGS__);\
+			bool bRes = UTH::Equals(_lhs, _rhs, __VA_ARGS__);\
 			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
