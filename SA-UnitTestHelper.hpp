@@ -340,7 +340,7 @@ namespace Sa
 			bool localExit = EXIT_SUCCESS;
 
 			/// Counter of test run in this group.
-			Counter count;
+			Counter count{};
 
 			/// Global Group counter.
 			static inline Counter globalCount;
