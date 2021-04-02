@@ -7,9 +7,12 @@
 
 #include <stack>
 #include <vector>
+
 #include <string>
-#include <fstream>
+#include <string.h> // Requiered for strrchr.
 #include <iostream>
+
+#include <fstream>
 #include <filesystem> 
 
 #if _WIN32
@@ -509,7 +512,7 @@ namespace Sa
 			if constexpr (std::is_arithmetic<T>::value)
 				return std::to_string(_elem);
 			else if constexpr (std::is_pointer<T>::value)
-				return "0x" + std::to_string(reinterpret_cast<unsigned __int64>(_elem));
+				return "0x" + std::to_string(reinterpret_cast<unsigned long long>(_elem));
 			else if constexpr (Intl::HM_ToString<T>::value)
 				return _elem.ToString();
 			else
@@ -799,7 +802,12 @@ namespace Sa
 					std::filesystem::create_directories("Logs");
 
 					struct tm timeinfo;
+
+				# if _WIN32
 					localtime_s(&timeinfo, &currTime);
+				#else
+					localtime_r(&currTime, &timeinfo);
+				#endif
 
 					/**
 					*	log_UTH-<month>.<day>.<year>-<hour>h<minute>m<second>s.txt
@@ -1268,7 +1276,7 @@ namespace Sa
 			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
-			bool bRes = UTH::Equals(_lhs, _rhs, __VA_ARGS__);\
+			bool bRes = UTH::Equals(_lhs, _rhs, ##__VA_ARGS__);\
 			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
@@ -1276,7 +1284,7 @@ namespace Sa
 				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + (SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
 			\
 				ComputeTitle(Title{ titleStr, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, __VA_ARGS__);\
+				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, ##__VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -1350,7 +1358,7 @@ namespace Sa
 			if(ShouldComputeTest(bRes))\
 			{\
 				ComputeTitle(Title{ #_caller "." #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_caller ", " #__VA_ARGS__, _caller, __VA_ARGS__);\
+				ComputeParam(bRes, #_caller ", " #__VA_ARGS__, _caller, ##__VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
 		}

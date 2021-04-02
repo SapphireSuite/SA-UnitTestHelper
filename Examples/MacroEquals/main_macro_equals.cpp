@@ -23,7 +23,7 @@ int main()
 
 	/// elem1, elem2, epsilon.
 	SA_UTH_EQ(i, i);
-	SA_UTH_EQ(i, j, FLT_EPSILON); // Error
+	SA_UTH_EQ(i, j, std::numeric_limits<float>::epsilon()); // Error
 
 
 	// Tab elems.
@@ -32,7 +32,7 @@ int main()
 	float ftab2[] = { 1.45f, 8.36f, 945.9f };
 
 	/// elem1, elem2, size, epsilon.
-	SA_UTH_EQ(ftab1, ftab2, 2, FLT_EPSILON);
+	SA_UTH_EQ(ftab1, ftab2, 2, std::numeric_limits<float>::epsilon());
 	SA_UTH_EQ(ftab1, ftab2, size); // Error
 
 
