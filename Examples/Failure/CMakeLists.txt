@@ -19,4 +19,4 @@ target_link_libraries(UTH_Failure PRIVATE SA-UnitTestHelper)
 # === Testing ===
 
 # Create CTest that run UnitTestFailure exe.
-add_test(NAME CUTH_Failure COMMAND UTH_Failure --config $<CONFIGURATION> --exe $<TARGET_FILE:UTH_Failure>)
+#add_test(NAME CUTH_Failure COMMAND UTH_Failure --config $<CONFIGURATION> --exe $<TARGET_FILE:UTH_Failure>)
