@@ -59,6 +59,13 @@ endif()
 
 
 
+# === Tests ===
+
+# Enable testing for this directory and below.
+enable_testing()
+
+
+
 # === Entrypoints ===
 
 add_subdirectory(Examples)

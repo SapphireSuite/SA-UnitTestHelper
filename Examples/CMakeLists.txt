@@ -32,10 +32,3 @@ add_subdirectory(Groups)
 add_subdirectory(Callbacks)
 add_subdirectory(Success)
 add_subdirectory(Failure)
-
-
-
-# === Tests ===
-
-# Enable testing for this directory and below.
-enable_testing()
