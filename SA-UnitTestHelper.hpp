@@ -38,9 +38,9 @@ namespace Sa
 	/// UnitTestHelper global namespace.
 	namespace UTH
 	{
-#pragma region Hpp
+//{ Hpp
 
-#pragma region Init / Exit
+//{ Init / Exit
 
 #ifndef SA_UTH_EXIT_ON_FAILURE
 		/**
@@ -91,10 +91,10 @@ namespace Sa
 		*/
 		#define SA_UTH_EXIT() return Sa::UTH::Intl::Exit();
 
-#pragma endregion
+//}
 
 
-#pragma region Verbosity
+//{ Verbosity
 
 		/// Verbosity level enum.
 		enum Verbosity
@@ -132,15 +132,15 @@ namespace Sa
 
 			/// Maximum verbosity level (all flags set).
 			Max = 0xFF
-	};
+		};
 
 		/// Current verbosity level.
 		inline unsigned int verbosity = Default;
 
-#pragma endregion
+//}
 
 
-#pragma region Logger
+//{ Logger
 
 #ifndef SA_UTH_DFLT_CSL_LOG
 		/**
@@ -275,10 +275,10 @@ namespace Sa
 			if (bFileLog) Logger::instance.logFile << std::endl;\
 		}
 
-#pragma endregion
+//}
 
 
-#pragma region Counter
+//{ Counter
 
 		struct Counter
 		{
@@ -301,10 +301,10 @@ namespace Sa
 			inline bool IsEmpty() const;
 		};
 
-#pragma endregion
+//}
 
 
-#pragma region Title
+//{ Title
 
 		struct Title
 		{
@@ -317,10 +317,10 @@ namespace Sa
 			inline void Log() const;
 		};
 
-#pragma endregion
+//}
 
 
-#pragma region Group
+//{ Group
 
 		/// Infos generated from a group of tests.
 		class Group
@@ -391,10 +391,10 @@ namespace Sa
 
 		inline std::stack<Group> Group::sGroups;
 
-#pragma endregion
+//}
 
 
-#pragma region Param
+//{ Param
 
 		/// Pair of param name and value.
 		struct Param
@@ -413,10 +413,10 @@ namespace Sa
 			static inline void Log(const std::vector<Param>& _params);
 		};
 
-#pragma endregion
+//}
 
 
-#pragma region Callback
+//{ Callback
 
 		/// Pointer to allow user to get custom data in callbacks.
 		inline void* UserData = nullptr;
@@ -446,10 +446,10 @@ namespace Sa
 		/// Callback called on test's result processing.
 		inline void (*ResultCB)(bool _pred) = nullptr;
 
-#pragma endregion
+//}
 
 
-#pragma region ToString
+//{ ToString
 
 		namespace Intl
 		{
@@ -551,10 +551,10 @@ namespace Sa
 			return res;
 		}
 
-#pragma endregion
+//}
 
 
-#pragma region Equals
+//{ Equals
 
 		/**
 		*	\brief Helper Equals function.
@@ -636,10 +636,10 @@ namespace Sa
 			return true;
 		}
 
-#pragma endregion
+//}
 
 
-#pragma region Random
+//{ Random
 
 		/**
 		*	\brief Rand between [min, max[ (max excluded).
@@ -667,10 +667,10 @@ namespace Sa
 		template<>
 		inline bool Rand(bool _min, bool _max) { (void)_min; (void)_max; return Rand<int>(0, 2) == 1; }
 
-#pragma endregion
+//}
 
 
-#pragma region Compute
+//{ Compute
 
 		/// \cond Internal
 
@@ -709,17 +709,17 @@ namespace Sa
 
 		/// \endcond
 
-#pragma endregion
+//}
 
 
-#pragma endregion
+//}
 
 
-#pragma region Cpp
+//{ Cpp
 
 		/// \cond
 
-#pragma region Init / Exit
+//{ Init / Exit
 
 		namespace Intl
 		{
@@ -786,10 +786,10 @@ namespace Sa
 			}
 		}
 
-#pragma endregion
+//}
 
 
-#pragma region Logger
+//{ Logger
 
 		namespace Intl
 		{
@@ -933,10 +933,10 @@ namespace Sa
 			}
 		}
 
-#pragma endregion
+//}
 
 
-#pragma region Counter
+//{ Counter
 
 		unsigned int Counter::Total() const
 		{
@@ -989,10 +989,10 @@ namespace Sa
 			return success != 0 && failure != 0;
 		}
 
-#pragma endregion
+//}
 
 
-#pragma region Title
+//{ Title
 
 		void Title::Log() const
 		{
@@ -1022,10 +1022,10 @@ namespace Sa
 			SetConsoleColor(CslColor::None);
 		}
 
-#pragma endregion
+//}
 
 
-#pragma region Group
+//{ Group
 
 		void Group::Update(bool _pred)
 		{
@@ -1133,10 +1133,10 @@ namespace Sa
 				__SA_UTH_LOG_IN(TabStr());
 		}
 
-#pragma endregion
+//}
 
 
-#pragma region Param
+//{ Param
 
 		void Param::Log(const std::vector<Param>& _params)
 		{
@@ -1160,10 +1160,10 @@ namespace Sa
 			}
 		}
 
-#pragma endregion
+//}
 
 
-#pragma region Compute
+//{ Compute
 
 		namespace Intl
 		{
@@ -1242,14 +1242,14 @@ namespace Sa
 			}
 		}
 
-#pragma endregion
+//}
 
 		/// \endcond
 
-#pragma endregion
+//}
 
 
-#pragma region Macro
+//{ Macro
 
 		/// \cond Internal
 
@@ -1468,7 +1468,7 @@ namespace Sa
 			SA_UTH_GPE()\
 		}
 
-#pragma endregion
+//}
 	}
 }
 
