@@ -2,7 +2,7 @@
 
 [![SA-CTests](https://github.com/sapphire-devteam/SA-UnitTestHelper/actions/workflows/sa_ctest.yml/badge.svg)](https://github.com/sapphire-devteam/SA-UnitTestHelper/actions/workflows/sa_ctest.yml)
 
-Sapphire single header file helper for unit testing.
+Sapphire's Suite's **single header file unit testing helper**.
 
 ## Documentations
 
