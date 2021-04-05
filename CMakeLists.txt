@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Sapphire Development Team. All Rights Reserved.
+# Copyright (c) 2021 Sapphire's Suite. All Rights Reserved.
 
 cmake_minimum_required(VERSION 3.16)
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Sapphire Development Team. All Rights Reserved.
+# Copyright (c) 2021 Sapphire's Suite. All Rights Reserved.
 # This script must be run from the root folder.
 
 config=$1

@@ -1,4 +1,5 @@
-// Copyright (c) 2021 Sapphire Development Team. All Rights Reserved.
+// Copyright (c) 2021 Sapphire's Suite. All Rights Reserved.
+// Repository: https://github.com/SapphireSuite/SA-UnitTestHelper
 
 #pragma once
 

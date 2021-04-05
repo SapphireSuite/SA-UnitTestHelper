@@ -1,4 +1,4 @@
-// Copyright 2021 mrouffet. All Rights Reserved.
+// Copyright (c) 2021 Sapphire's Suite. All Rights Reserved.. All Rights Reserved.
 
 #include <SA-UnitTestHelper.hpp>
 using namespace Sa;
