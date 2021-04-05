@@ -5,11 +5,11 @@
 # === Input ===
 
 # Add executable target built from sources.
-add_executable(UTH_MacroMFunc main_macro_mfunc.cpp)
+add_executable(SA-UTH_MacroMFunc main_macro_mfunc.cpp)
 
 
 
 # === Dependencies ===
 
 # Add library dependencies.
-target_link_libraries(UTH_MacroMFunc PRIVATE SA-UnitTestHelper)
+target_link_libraries(SA-UTH_MacroMFunc PRIVATE SA-UnitTestHelper)
