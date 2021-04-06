@@ -58,6 +58,14 @@ if(SA_UTH_EXIT_ON_FAILURE)
 endif()
 
 
+# Test exit on first failure.
+option(SA_UTH_EXIT_PAUSE "Should pause program on exit" OFF)
+
+if(SA_UTH_EXIT_PAUSE)
+	target_compile_definitions(SA-UnitTestHelper INTERFACE SA_UTH_EXIT_PAUSE)
+endif()
+
+
 
 # === Tests ===
 

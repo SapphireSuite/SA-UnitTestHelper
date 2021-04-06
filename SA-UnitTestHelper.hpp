@@ -51,6 +51,14 @@ namespace Sa
 		#define SA_UTH_EXIT_ON_FAILURE 0
 #endif
 
+#ifndef SA_UTH_EXIT_PAUSE
+	/**
+	*	\brief Whether to pause program on exit.
+	*	Always disabled in continuous integration (define SA_CI).
+	*/
+	#define SA_UTH_EXIT_PAUSE 0
+#endif
+
 		/**
 		*	\brief Exit result from unit testing.
 		*
@@ -782,6 +790,11 @@ namespace Sa
 
 				__SA_UTH_LOG_ENDL();
 				SetConsoleColor(CslColor::None);
+
+			#if SA_UTH_EXIT_PAUSE && !defined(SA_CI)
+				SA_UTH_LOG("[SA-UTH] Press Enter to continue...");
+				std::cin.get();
+			#endif
 
 				return exit;
 			}
