@@ -1,5 +1,5 @@
 // Copyright (c) 2021 Sapphire's Suite. All Rights Reserved.
-// Repository: https://github.com/SapphireSuite/SA-UnitTestHelper
+// Repository: https://github.com/SapphireSuite/UnitTestHelper
 
 #pragma once
 
@@ -29,7 +29,7 @@
 #endif
 
 /**
-*	\file SA-UnitTestHelper.hpp
+*	\file UnitTestHelper.hpp
 *
 *	\brief Single header file helper for unit testing.
 */
@@ -465,7 +465,7 @@ namespace Sa
 			/**
 			*	Compile time check type T has member ToString using SFINAE.
 			* 
-			*	Source: https://github.com/sapphire-devteam/SA-Core/blob/main/Include/SA-Core/Misc/HasMember.hpp
+			*	Source: https://github.com/SapphireSuite/Core/blob/main/Include/Core/Misc/HasMember.hpp
 			*
 			*/
 			template <typename T>
