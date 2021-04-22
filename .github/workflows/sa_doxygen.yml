@@ -1,6 +1,6 @@
 # Copyright (c) 2021 Sapphire's Suite. All Rights Reserved.
-# Repository: https://github.com/SapphireSuite/SA-CI
-# Use template doxygen.config file for complete integration: https://github.com/SapphireSuite/SA-CI/blob/main/doxygen.config
+# Repository: https://github.com/SapphireSuite/CI
+# Use template doxygen.config file for complete integration: https://github.com/SapphireSuite/CI/blob/main/doxygen.config
 
 name: SA-Doxygen
 
