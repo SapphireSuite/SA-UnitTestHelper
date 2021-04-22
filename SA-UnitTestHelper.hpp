@@ -1,4 +1,5 @@
-// Copyright (c) 2021 Sapphire Development Team. All Rights Reserved.
+// Copyright (c) 2021 Sapphire's Suite. All Rights Reserved.
+// Repository: https://github.com/SapphireSuite/SA-UnitTestHelper
 
 #pragma once
 
@@ -48,6 +49,14 @@ namespace Sa
 		*	Can be defined within cmake options or before including the header.
 		*/
 		#define SA_UTH_EXIT_ON_FAILURE 0
+#endif
+
+#ifndef SA_UTH_EXIT_PAUSE
+	/**
+	*	\brief Whether to pause program on exit.
+	*	Always disabled in continuous integration (define SA_CI).
+	*/
+	#define SA_UTH_EXIT_PAUSE 0
 #endif
 
 		/**
@@ -782,6 +791,11 @@ namespace Sa
 				__SA_UTH_LOG_ENDL();
 				SetConsoleColor(CslColor::None);
 
+			#if SA_UTH_EXIT_PAUSE && !defined(SA_CI)
+				SA_UTH_LOG("[SA-UTH] Press Enter to continue...");
+				std::cin.get();
+			#endif
+
 				return exit;
 			}
 		}
@@ -1276,7 +1290,9 @@ namespace Sa
 			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
-			bool bRes = UTH::Equals(_lhs, _rhs, ##__VA_ARGS__);\
+			auto&& sLhs = _lhs;\
+			auto&& sRhs = _rhs;\
+			bool bRes = UTH::Equals(sLhs, sRhs, ##__VA_ARGS__);\
 			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
@@ -1284,7 +1300,7 @@ namespace Sa
 				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + (SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
 			\
 				ComputeTitle(Title{ titleStr, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, ##__VA_ARGS__);\
+				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, sLhs, sRhs, ##__VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -1404,13 +1420,15 @@ namespace Sa
 			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
-			bool bRes = _lhs _op _rhs;\
+			auto&& sLhs = _lhs;\
+			auto&& sRhs = _rhs;\
+			bool bRes = sLhs _op sRhs;\
 			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
 				ComputeTitle(Title{ #_lhs " " #_op " " #_rhs, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_lhs ", " #_rhs, _lhs, _rhs);\
+				ComputeParam(bRes, #_lhs ", " #_rhs, sLhs, sRhs);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -1430,14 +1448,16 @@ namespace Sa
 			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
-			auto result = _lhs _op _rhs;\
+			auto&& sLhs = _lhs;\
+			auto&& sRhs = _rhs;\
+			auto result = sLhs _op sRhs;\
 			bool bRes = result == _res;\
 			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
 				ComputeTitle(Title{ #_lhs " " #_op " " #_rhs " == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, _lhs, _rhs, result, _res);\
+				ComputeParam(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, sLhs, sRhs, result, _res);\
 				ComputeResult(bRes);\
 			}\
 		}
