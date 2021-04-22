@@ -1290,7 +1290,9 @@ namespace Sa
 			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
-			bool bRes = UTH::Equals(_lhs, _rhs, ##__VA_ARGS__);\
+			auto&& sLhs = _lhs;\
+			auto&& sRhs = _rhs;\
+			bool bRes = UTH::Equals(sLhs, sRhs, ##__VA_ARGS__);\
 			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
@@ -1298,7 +1300,7 @@ namespace Sa
 				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + (SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
 			\
 				ComputeTitle(Title{ titleStr, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, _lhs, _rhs, ##__VA_ARGS__);\
+				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, sLhs, sRhs, ##__VA_ARGS__);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -1418,13 +1420,15 @@ namespace Sa
 			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
-			bool bRes = _lhs _op _rhs;\
+			auto&& sLhs = _lhs;\
+			auto&& sRhs = _rhs;\
+			bool bRes = sLhs _op sRhs;\
 			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
 				ComputeTitle(Title{ #_lhs " " #_op " " #_rhs, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_lhs ", " #_rhs, _lhs, _rhs);\
+				ComputeParam(bRes, #_lhs ", " #_rhs, sLhs, sRhs);\
 				ComputeResult(bRes);\
 			}\
 		}
@@ -1444,14 +1448,16 @@ namespace Sa
 			using namespace Sa::UTH;\
 			using namespace Sa::UTH::Intl;\
 		\
-			auto result = _lhs _op _rhs;\
+			auto&& sLhs = _lhs;\
+			auto&& sRhs = _rhs;\
+			auto result = sLhs _op sRhs;\
 			bool bRes = result == _res;\
 			Sa::UTH::Intl::Update(bRes);\
 		\
 			if(ShouldComputeTest(bRes))\
 			{\
 				ComputeTitle(Title{ #_lhs " " #_op " " #_rhs " == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, _lhs, _rhs, result, _res);\
+				ComputeParam(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, sLhs, sRhs, result, _res);\
 				ComputeResult(bRes);\
 			}\
 		}
