@@ -823,7 +823,7 @@ namespace Sa
 					_mkdir("Logs");
 					localtime_s(&timeinfo, &currTime);
 				#else
-					mkdir("Logs");
+					mkdir("Logs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 					localtime_r(&currTime, &timeinfo);
 				#endif
 
