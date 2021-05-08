@@ -14,11 +14,15 @@
 #include <iostream>
 
 #include <fstream>
-#include <filesystem> 
 
 #if _WIN32
 
 #include <Windows.h>
+#include <direct.h> // file directory.
+
+#else
+
+#include <sys/stat.h> // file directory.
 
 #endif
 
@@ -813,13 +817,13 @@ namespace Sa
 
 				// Open Log file.
 				{
-					std::filesystem::create_directories("Logs");
-
 					struct tm timeinfo;
 
 				# if _WIN32
+					_mkdir("Logs");
 					localtime_s(&timeinfo, &currTime);
 				#else
+					mkdir("Logs");
 					localtime_r(&currTime, &timeinfo);
 				#endif
 
@@ -847,9 +851,18 @@ namespace Sa
 				{
 					logFile.close();
 
+					struct stat s;
+					stat(logFileName.c_str(), &s);
+
 					// Delete if empty file.
-					if (std::filesystem::is_empty(logFileName))
-						std::filesystem::remove(logFileName);
+					if (s.st_size == 0)
+					{
+					#if _WIN32
+						_rmdir(logFileName.c_str());
+					#else
+						rmdir(logFileName.c_str());
+					#endif
+					}
 				}
 			}
 
