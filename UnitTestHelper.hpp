@@ -22,7 +22,9 @@
 
 #else
 
-#include <sys/stat.h> // file directory.
+// file directory.
+#include <unistd.h>
+#include <sys/stat.h>
 
 #endif
 
