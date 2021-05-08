@@ -3,6 +3,8 @@
 #include <UnitTestHelper.hpp>
 using namespace Sa;
 
+#include <limits>
+
 struct MyClass
 {
 	float myFloat = 0.0f;
