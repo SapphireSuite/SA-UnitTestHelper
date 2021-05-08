@@ -914,7 +914,42 @@ namespace Sa
 #else
 			void SetConsoleColor(CslColor _result)
 			{
-				(void)_result;
+				switch (_result)
+				{
+					case CslColor::None:
+						std::cout << "\033[0;0m";
+						break;
+					case CslColor::Title:
+						std::cout << "\033[0;33m";
+						break;
+					case CslColor::Success:
+						std::cout << "\033[0;32m";
+						break;
+					case CslColor::Failure:
+						std::cout << "\033[0;31m";
+						break;
+					case CslColor::TestNum:
+						std::cout << "\033[1;33m";
+						break;
+					case CslColor::GroupBegin:
+						std::cout << "\033[1;34m";
+						break;
+					case CslColor::GroupEnd:
+						std::cout << "\033[1;34m";
+						break;
+					case CslColor::Init:
+						std::cout << "\033[0;35m";
+						break;
+					case CslColor::Exit:
+						std::cout << "\033[0;35m";
+						break;
+					case CslColor::ParamWarning:
+						std::cout << "\033[1;33m";
+						break;
+					default:
+						SA_UTH_LOG("CslColor not supported yet!");
+						break;
+				}
 			}
 #endif
 
