@@ -265,29 +265,23 @@ namespace Sa
 		*/
 		#define SA_UTH_LOG(_str)\
 		{\
-			using namespace Sa::UTH::Intl;\
-		\
-			Group::LogTabs();\
-			if (bCslLog) std::cout << _str << std::endl;\
-			if (bFileLog) Logger::instance.logFile << _str << std::endl;\
+			Sa::UTH::Group::LogTabs();\
+			if (Sa::UTH::bCslLog) std::cout << _str << std::endl;\
+			if (Sa::UTH::bFileLog) Sa::UTH::Intl::Logger::instance.logFile << _str << std::endl;\
 		}
 
 		/// Output only str as input.
 		#define __SA_UTH_LOG_IN(_str)\
 		{\
-			using namespace Sa::UTH::Intl;\
-		\
-			if (bCslLog) std::cout << _str;\
-			if (bFileLog) Logger::instance.logFile << _str;\
+			if (Sa::UTH::bCslLog) std::cout << _str;\
+			if (Sa::UTH::bFileLog) Sa::UTH::Intl::Logger::instance.logFile << _str;\
 		}
 
 		/// Ouput only end of line.
 		#define __SA_UTH_LOG_ENDL()\
 		{\
-			using namespace Sa::UTH::Intl;\
-		\
-			if (bCslLog) std::cout << std::endl;\
-			if (bFileLog) Logger::instance.logFile << std::endl;\
+			if (Sa::UTH::bCslLog) std::cout << std::endl;\
+			if (Sa::UTH::bFileLog) Sa::UTH::Intl::Logger::instance.logFile << std::endl;\
 		}
 
 //}
@@ -1337,21 +1331,19 @@ namespace Sa
 		*/
 		#define SA_UTH_EQ(_lhs, _rhs, ...)\
 		{\
-			using namespace Sa::UTH;\
-			using namespace Sa::UTH::Intl;\
-		\
 			auto&& sLhs = _lhs;\
 			auto&& sRhs = _rhs;\
-			bool bRes = UTH::Equals(sLhs, sRhs, ##__VA_ARGS__);\
+			bool bRes = Sa::UTH::Equals(sLhs, sRhs, ##__VA_ARGS__);\
 			Sa::UTH::Intl::Update(bRes);\
 		\
-			if(ShouldComputeTest(bRes))\
+			if(Sa::UTH::Intl::ShouldComputeTest(bRes))\
 			{\
-				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + (SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
+				std::string titleStr = std::string("Sa::UTH::Equals(" #_lhs ", " #_rhs) + \
+				(Sa::UTH::Intl::SizeOfArgs(__VA_ARGS__) ? ", " #__VA_ARGS__ ")" : ")");\
 			\
-				ComputeTitle(Title{ titleStr, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, sLhs, sRhs, ##__VA_ARGS__);\
-				ComputeResult(bRes);\
+				Sa::UTH::Intl::ComputeTitle(Sa::UTH::Title{ titleStr, __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				Sa::UTH::Intl::ComputeParam(bRes, #_lhs ", " #_rhs ", " #__VA_ARGS__, sLhs, sRhs, ##__VA_ARGS__);\
+				Sa::UTH::Intl::ComputeResult(bRes);\
 			}\
 		}
 
@@ -1365,17 +1357,14 @@ namespace Sa
 		*/
 		#define SA_UTH_SF(_func, ...)\
 		{\
-			using namespace Sa::UTH;\
-			using namespace Sa::UTH::Intl;\
-		\
 			bool bRes = _func(__VA_ARGS__);\
 			Sa::UTH::Intl::Update(bRes);\
 		\
-			if(ShouldComputeTest(bRes))\
+			if(Sa::UTH::Intl::ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(Title{ #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #__VA_ARGS__, __VA_ARGS__);\
-				ComputeResult(bRes);\
+				Sa::UTH::Intl::ComputeTitle(Sa::UTH::Title{ #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				Sa::UTH::Intl::ComputeParam(bRes, #__VA_ARGS__, __VA_ARGS__);\
+				Sa::UTH::Intl::ComputeResult(bRes);\
 			}\
 		}
 
@@ -1389,18 +1378,15 @@ namespace Sa
 		*/
 		#define SA_UTH_RSF(_res, _func, ...)\
 		{\
-			using namespace Sa::UTH;\
-			using namespace Sa::UTH::Intl;\
-		\
 			auto result = _func(__VA_ARGS__);\
 			bool bRes = result == _res;\
 			Sa::UTH::Intl::Update(bRes);\
 		\
-			if(ShouldComputeTest(bRes))\
+			if(Sa::UTH::Intl::ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(Title{ #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #__VA_ARGS__ ", " #_func "(), " #_res, __VA_ARGS__, result, _res);\
-				ComputeResult(bRes);\
+				Sa::UTH::Intl::ComputeTitle(Sa::UTH::Title{ #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				Sa::UTH::Intl::ComputeParam(bRes, #__VA_ARGS__ ", " #_func "(), " #_res, __VA_ARGS__, result, _res);\
+				Sa::UTH::Intl::ComputeResult(bRes);\
 			}\
 		}
 
@@ -1415,17 +1401,14 @@ namespace Sa
 		*/
 		#define SA_UTH_MF(_caller, _func, ...)\
 		{\
-			using namespace Sa::UTH;\
-			using namespace Sa::UTH::Intl;\
-		\
 			bool bRes = (_caller)._func(__VA_ARGS__);\
 			Sa::UTH::Intl::Update(bRes);\
 		\
-			if(ShouldComputeTest(bRes))\
+			if(Sa::UTH::Intl::ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(Title{ #_caller "." #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_caller ", " #__VA_ARGS__, _caller, ##__VA_ARGS__);\
-				ComputeResult(bRes);\
+				Sa::UTH::Intl::ComputeTitle(Sa::UTH::Title{ #_caller "." #_func "(" #__VA_ARGS__ ")", __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				Sa::UTH::Intl::ComputeParam(bRes, #_caller ", " #__VA_ARGS__, _caller, ##__VA_ARGS__);\
+				Sa::UTH::Intl::ComputeResult(bRes);\
 			}\
 		}
 
@@ -1440,18 +1423,15 @@ namespace Sa
 		*/
 		#define SA_UTH_RMF(_res, _caller, _func, ...)\
 		{\
-			using namespace Sa::UTH;\
-			using namespace Sa::UTH::Intl;\
-		\
 			auto result = (_caller)._func(__VA_ARGS__);\
 			bool bRes = result == _res;\
 			Sa::UTH::Intl::Update(bRes);\
 		\
-			if(ShouldComputeTest(bRes))\
+			if(Sa::UTH::Intl::ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(Title{ #_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_caller ", " #__VA_ARGS__ ", " #_caller "." #_func "(), " #_res, _caller, __VA_ARGS__, result, _res);\
-				ComputeResult(bRes);\
+				Sa::UTH::Intl::ComputeTitle(Sa::UTH::Title{ #_caller "." #_func "(" #__VA_ARGS__ ") == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				Sa::UTH::Intl::ComputeParam(bRes, #_caller ", " #__VA_ARGS__ ", " #_caller "." #_func "(), " #_res, _caller, __VA_ARGS__, result, _res);\
+				Sa::UTH::Intl::ComputeResult(bRes);\
 			}\
 		}
 
@@ -1467,19 +1447,16 @@ namespace Sa
 		*/
 		#define SA_UTH_OP(_lhs, _op, _rhs)\
 		{\
-			using namespace Sa::UTH;\
-			using namespace Sa::UTH::Intl;\
-		\
 			auto&& sLhs = _lhs;\
 			auto&& sRhs = _rhs;\
 			bool bRes = sLhs _op sRhs;\
 			Sa::UTH::Intl::Update(bRes);\
 		\
-			if(ShouldComputeTest(bRes))\
+			if(Sa::UTH::Intl::ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(Title{ #_lhs " " #_op " " #_rhs, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_lhs ", " #_rhs, sLhs, sRhs);\
-				ComputeResult(bRes);\
+				Sa::UTH::Intl::ComputeTitle(Sa::UTH::Title{ #_lhs " " #_op " " #_rhs, __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				Sa::UTH::Intl::ComputeParam(bRes, #_lhs ", " #_rhs, sLhs, sRhs);\
+				Sa::UTH::Intl::ComputeResult(bRes);\
 			}\
 		}
 
@@ -1495,20 +1472,17 @@ namespace Sa
 		*/
 		#define SA_UTH_ROP(_res, _lhs, _op, _rhs)\
 		{\
-			using namespace Sa::UTH;\
-			using namespace Sa::UTH::Intl;\
-		\
 			auto&& sLhs = _lhs;\
 			auto&& sRhs = _rhs;\
 			auto result = sLhs _op sRhs;\
 			bool bRes = result == _res;\
 			Sa::UTH::Intl::Update(bRes);\
 		\
-			if(ShouldComputeTest(bRes))\
+			if(Sa::UTH::Intl::ShouldComputeTest(bRes))\
 			{\
-				ComputeTitle(Title{ #_lhs " " #_op " " #_rhs " == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
-				ComputeParam(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, sLhs, sRhs, result, _res);\
-				ComputeResult(bRes);\
+				Sa::UTH::Intl::ComputeTitle(Sa::UTH::Title{ #_lhs " " #_op " " #_rhs " == " #_res, __SA_UTH_FILE_NAME, __LINE__, bRes });\
+				Sa::UTH::Intl::ComputeParam(bRes, #_lhs ", " #_rhs ", " #_lhs " " #_op " " #_rhs ", " #_res, sLhs, sRhs, result, _res);\
+				Sa::UTH::Intl::ComputeResult(bRes);\
 			}\
 		}
 
