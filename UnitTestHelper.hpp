@@ -520,6 +520,8 @@ namespace Sa
 				return "0x" + std::to_string(reinterpret_cast<unsigned long long>(_elem));
 			else if constexpr (Intl::HM_ToString<T>::value)
 				return _elem.ToString();
+			else if constexpr (std::is_same<T, std::string>::value)
+				return _elem;
 			else
 			{
 #if SA_CORE_IMPL
