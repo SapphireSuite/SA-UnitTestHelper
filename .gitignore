@@ -11,6 +11,7 @@
 # CMake cache.
 CMakeFiles/
 CMakeCache.txt
+CMakeSettings.json
 Makefile
 *.cmake
 
@@ -34,5 +35,6 @@ Makefile
 
 
 # Documentation generated files
+[Dd]oc/
 html/
 latex/

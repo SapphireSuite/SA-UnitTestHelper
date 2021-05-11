@@ -66,6 +66,9 @@ if(SA_UTH_EXIT_PAUSE)
 endif()
 
 
+# Add SA-UnitTestHelper's examples to build tree.
+option(SA_UTH_BUILD_EXAMPLES "Should build SA-Engine tests" OFF)
+
 
 # === Tests ===
 
@@ -76,4 +79,6 @@ enable_testing()
 
 # === Entrypoints ===
 
-add_subdirectory(Examples)
+if(SA_UTH_BUILD_EXAMPLES OR SA_CI)
+	add_subdirectory(Examples)
+endif()
