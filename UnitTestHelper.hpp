@@ -514,6 +514,8 @@ namespace Sa
 		{
 			if constexpr (std::is_arithmetic<T>::value)
 				return std::to_string(_elem);
+			else if constexpr (std::is_enum<T>::value)
+				return std::to_string(static_cast<unsigned int>(_elem));
 			else if constexpr (std::is_pointer<T>::value)
 				return "0x" + std::to_string(reinterpret_cast<unsigned long long>(_elem));
 			else if constexpr (Intl::HM_ToString<T>::value)
