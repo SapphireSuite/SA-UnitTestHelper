@@ -79,6 +79,6 @@ enable_testing()
 
 # === Entrypoints ===
 
-if(SA_UTH_BUILD_EXAMPLES OR SA_CI)
+if(SA_UTH_BUILD_EXAMPLES)
 	add_subdirectory(Examples)
 endif()
