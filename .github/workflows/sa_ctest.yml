@@ -21,7 +21,7 @@ defaults:
 # Variables common to all jobs.
 env:
   CMAKE_V: '3.17.0'
-
+  CMAKE_OPTIONS: '-DSA_CI=1 -DSA_UTH_BUILD_EXAMPLES=ON'
 
 # Job matrix
 jobs:
@@ -107,7 +107,7 @@ jobs:
 
         # Deploy & Build & Test
         - name: Generate Project
-          run: cmake -B Build/${{ matrix.gen }}/${{ matrix.build_config }} -DCMAKE_BUILD_TYPE=${{ matrix.build_config }} -DSA_CI=1 -DSA_UTH_BUILD_EXAMPLES=ON -G "${GEN}"
+          run: cmake -B Build/${{ matrix.gen }}/${{ matrix.build_config }} -DCMAKE_BUILD_TYPE=${{ matrix.build_config }} ${{ env.CMAKE_OPTIONS }} -G "${GEN}"
 
         - name: Build Project
           run: cmake --build Build/${{ matrix.gen }}/${{ matrix.build_config }} --config ${{ matrix.build_config }} --verbose
@@ -212,17 +212,17 @@ jobs:
         # Default
         - name: Generate Project
           if: ${{ matrix.gen != 'VS2019' }}
-          run: cmake -B Build/${{ matrix.gen }}/${{ matrix.build_config }} -DCMAKE_BUILD_TYPE=${{ matrix.build_config }} -DSA_CI=1 -DSA_UTH_BUILD_EXAMPLES=ON -G "${GEN}"
+          run: cmake -B Build/${{ matrix.gen }}/${{ matrix.build_config }} -DCMAKE_BUILD_TYPE=${{ matrix.build_config }} ${{ env.CMAKE_OPTIONS }} -G "${GEN}"
 
         # Visual Studio only
         - name: Generate Project - VS2019
           if: ${{ matrix.gen == 'VS2019' && matrix.compiler != 'Clang' }}
-          run: cmake -B Build/${{ matrix.gen }}/${{ matrix.build_config }} -DCMAKE_BUILD_TYPE=${{ matrix.build_config }} -DSA_CI=1 -DSA_UTH_BUILD_EXAMPLES=ON -G "${GEN}" -A x64
+          run: cmake -B Build/${{ matrix.gen }}/${{ matrix.build_config }} -DCMAKE_BUILD_TYPE=${{ matrix.build_config }} ${{ env.CMAKE_OPTIONS }} -G "${GEN}" -A x64
 
         # Visual Studio with ClangCl
         - name: Generate Project - ClangCl
           if: ${{ matrix.gen == 'VS2019' && matrix.compiler == 'Clang' }}
-          run: cmake -B Build/${{ matrix.gen }}/${{ matrix.build_config }} -DCMAKE_BUILD_TYPE=${{ matrix.build_config }} -DSA_CI=1 -DSA_UTH_BUILD_EXAMPLES=ON -G "${GEN}" -A x64 -T "ClangCl"
+          run: cmake -B Build/${{ matrix.gen }}/${{ matrix.build_config }} -DCMAKE_BUILD_TYPE=${{ matrix.build_config }} ${{ env.CMAKE_OPTIONS }} -G "${GEN}" -A x64 -T "ClangCl"
 
         - name: Build Project
           run: cmake --build Build/${{ matrix.gen }}/${{ matrix.build_config }} --config ${{ matrix.build_config }} --verbose
@@ -298,7 +298,7 @@ jobs:
 
         # Deploy & Build & Test
         - name: Generate Project
-          run: cmake -B Build/${{ matrix.gen }}/${{ matrix.build_config }} -DCMAKE_BUILD_TYPE=${{ matrix.build_config }} -DSA_CI=1 -DSA_UTH_BUILD_EXAMPLES=ON -G "${GEN}"
+          run: cmake -B Build/${{ matrix.gen }}/${{ matrix.build_config }} -DCMAKE_BUILD_TYPE=${{ matrix.build_config }} ${{ env.CMAKE_OPTIONS }} -G "${GEN}"
 
         - name: Build Project
           run: cmake --build Build/${{ matrix.gen }}/${{ matrix.build_config }} --config ${{ matrix.build_config }} --verbose
