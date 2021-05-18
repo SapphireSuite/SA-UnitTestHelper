@@ -111,6 +111,15 @@ int main()
 	SA_UTH_INIT();
 
 
+	int aa1 = 1;
+	float f1 = 1.0f;
+	
+	std::cout << "HELLO 0" << std::endl;
+	
+	SA_UTH_EQ(aa1, static_cast<int>(f1));
+	
+	std::cout << "HELLO 1" << std::endl;
+
 	SA_UTH_GP(MainTests());
 
 
